@@ -24,12 +24,36 @@
     <ClInclude Include="src\Constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\AHRSMath.h">
+    <ClInclude Include="src\Fusion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FusionAhrs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FusionAxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FusionCalibration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FusionCompass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FusionMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FusionOffset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AHRSMath.cpp">
+    <ClCompile Include="src\FusionAhrs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FusionCompass.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FusionOffset.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

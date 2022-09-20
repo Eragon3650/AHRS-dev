@@ -110,14 +110,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\AHRSMath.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="src\Constants.h" />
+    <ClInclude Include="src\Fusion.h" />
+    <ClInclude Include="src\FusionAhrs.h" />
+    <ClInclude Include="src\FusionAxes.h" />
+    <ClInclude Include="src\FusionCalibration.h" />
+    <ClInclude Include="src\FusionCompass.h" />
+    <ClInclude Include="src\FusionMath.h" />
+    <ClInclude Include="src\FusionOffset.h" />
     <ClInclude Include="__vm\.AHRS-dev.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AHRSMath.cpp" />
+    <ClCompile Include="src\FusionAhrs.c" />
+    <ClCompile Include="src\FusionCompass.c" />
+    <ClCompile Include="src\FusionOffset.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
