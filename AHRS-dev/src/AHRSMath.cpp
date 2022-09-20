@@ -1,6 +1,26 @@
 #include "AHRSMath.h"
 
-static inline Vector VectorAdd(const Vector vectorA, const Vector vectorB) {
+bool VectorIsZero(const Vector vector) {
+	return (vector.axis.x == 0.0f) && (vector.axis.y == 0.0f) && (vector.axis.z == 0.0f);
+}
+
+float VectorSum(const Vector vector) {
+	return vector.axis.x + vector.axis.y + vector.axis.z;
+}
+
+Vector VectorHadamardProduct(const Vector vectorA, const Vector vectorB) {
+	Vector result;
+	result.axis.x = vectorA.axis.x * vectorB.axis.x;
+	result.axis.y = vectorA.axis.y * vectorB.axis.y;
+	result.axis.z = vectorA.axis.z * vectorB.axis.z;
+	return result;
+}
+
+float VectorMagnitudeSquared(const Vector vector) {
+	return VectorSum(VectorHadamardProduct(vector, vector));
+}
+
+Vector VectorAdd(const Vector vectorA, const Vector vectorB) {
 	Vector sum;
 	sum.axis.x = vectorA.axis.x + vectorB.axis.x;
 	sum.axis.y = vectorA.axis.y + vectorB.axis.y;
@@ -8,7 +28,7 @@ static inline Vector VectorAdd(const Vector vectorA, const Vector vectorB) {
 	return sum;
 }
 
-static inline Vector VectorMultiplyScalar(const Vector vector, const float number) {
+Vector VectorMultiplyScalar(const Vector vector, const float number) {
 	Vector product;
 	product.axis.x = vector.axis.x * number;
 	product.axis.y = vector.axis.y * number;
@@ -16,7 +36,7 @@ static inline Vector VectorMultiplyScalar(const Vector vector, const float numbe
 	return product;
 }
 
-static inline Vector VectorCrossProduct(Vector vectorA, Vector vectorB) {
+Vector VectorCrossProduct(Vector vectorA, Vector vectorB) {
 #define A vectorA.axis
 #define B vectorA.axis
 	Vector result;
@@ -28,7 +48,7 @@ static inline Vector VectorCrossProduct(Vector vectorA, Vector vectorB) {
 #undef B
 }
 
-static inline Vector VectorNormalize(Vector vector) {
+Vector VectorNormalize(Vector vector) {
 #define V vector.axis
 	Vector result;
 	const float normal = 1.0f / sqrtf(V.x * V.x + V.y * V.y + V.z * V.z);
@@ -36,30 +56,10 @@ static inline Vector VectorNormalize(Vector vector) {
 	result.axis.y = V.y / normal;
 	result.axis.z = V.z / normal;
 	return result;
-#undef v
+#undef V
 }
 
-static inline Vector VectorHadamardProduct(const Vector vectorA, const Vector vectorB) {
-	Vector result;
-	result.axis.x = vectorA.axis.x * vectorB.axis.x;
-	result.axis.y = vectorA.axis.y * vectorB.axis.y;
-	result.axis.z = vectorA.axis.z * vectorB.axis.z;
-	return result;
-}
-
-static inline float VectorMagnitudeSquared(const Vector vector) {
-	return VectorSum(VectorHadamardProduct(vector, vector));
-}
-
-static inline bool VectorIsZero(const Vector vector) {
-	return (vector.axis.x == 0.0f) && (vector.axis.y == 0.0f) && (vector.axis.z == 0.0f);
-}
-
-static inline float VectorSum(const Vector vector) {
-	return vector.axis.x + vector.axis.y + vector.axis.z;
-}
-
-static inline Quaternion QuaternionAdd(Quaternion const quaternionA, Quaternion const quaternionB) {
+Quaternion QuaternionAdd(Quaternion const quaternionA, Quaternion const quaternionB) {
 	Quaternion sum;
 	sum.element.w = quaternionA.element.w + quaternionB.element.w;
 	sum.element.x = quaternionA.element.x + quaternionB.element.x;
@@ -68,7 +68,7 @@ static inline Quaternion QuaternionAdd(Quaternion const quaternionA, Quaternion 
 	return sum;
 }
 
-static inline Quaternion QuaternionMultiplyScalar(const Quaternion quaternion, const float number) {
+Quaternion QuaternionMultiplyScalar(const Quaternion quaternion, const float number) {
 	Quaternion product;
 	product.element.w = quaternion.element.w * number;
 	product.element.x = quaternion.element.x * number;
@@ -77,7 +77,7 @@ static inline Quaternion QuaternionMultiplyScalar(const Quaternion quaternion, c
 	return product;
 }
 
-static inline Quaternion QuaternionMultiply(const Quaternion quaternionA, const Quaternion quaternionB) {
+Quaternion QuaternionMultiply(const Quaternion quaternionA, const Quaternion quaternionB) {
 #define L quaternionA.element
 #define R quaternionB.element
 	Quaternion product;
@@ -90,7 +90,7 @@ static inline Quaternion QuaternionMultiply(const Quaternion quaternionA, const 
 #undef R
 }
 
-static inline Quaternion QuaternionMultiplyVector(const Quaternion quaternion, const Vector vector) {
+Quaternion QuaternionMultiplyVector(const Quaternion quaternion, const Vector vector) {
 #define Q quaternion.element
 #define V vector.axis
 	Quaternion result;
@@ -103,7 +103,7 @@ static inline Quaternion QuaternionMultiplyVector(const Quaternion quaternion, c
 #undef V
 }
 
-static inline Quaternion QuaternionConjugate(const Quaternion quaternion) {
+Quaternion QuaternionConjugate(const Quaternion quaternion) {
 	Quaternion conjugate;
 	conjugate.element.w = quaternion.element.w;
 	conjugate.element.x = -quaternion.element.x;
@@ -113,7 +113,7 @@ static inline Quaternion QuaternionConjugate(const Quaternion quaternion) {
 }
 
 //Returns normalized quaternion
-static inline Quaternion QuaternionNormalize(const Quaternion quaternion) {
+Quaternion QuaternionNormalize(const Quaternion quaternion) {
 #define Q quaternion.element
 	Quaternion result;
 	const float normal = sqrtf(Q.w * Q.w + Q.x * Q.x + Q.y * Q.y + Q.z * Q.z);
@@ -125,13 +125,13 @@ static inline Quaternion QuaternionNormalize(const Quaternion quaternion) {
 #undef Q
 }
 
-static inline Euler QuaternionToEuler(const Quaternion quaternion) {
+Euler QuaternionToEuler(const Quaternion quaternion) {
 #define Q quaternion.element
 	const float halfMinusQySquared = 0.5f - Q.y * Q.y; // calculate common terms to avoid repeated operations
 	Euler euler;
-	euler.angle.roll = TO_DEG * (atan2(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x));
-	euler.angle.pitch = TO_DEG * (asin(2.0f * (Q.w * Q.y - Q.z * Q.x)));
-	euler.angle.yaw = TO_DEG * (atan2(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z));
+	euler.angle.roll = TO_DEG * (atan2f(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x));
+	euler.angle.pitch = TO_DEG * (asinf(2.0f * (Q.w * Q.y - Q.z * Q.x)));
+	euler.angle.yaw = TO_DEG * (atan2f(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z));
 	return euler;
 #undef Q
 }

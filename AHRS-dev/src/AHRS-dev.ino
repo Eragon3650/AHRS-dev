@@ -9,7 +9,6 @@
 #include <Wire.h>
 #include <SparkFun_ISM330DHCX.h>
 #include <SparkFun_MMC5983MA_Arduino_Library.h>
-#include <MadgwickAHRS.h>
 
 SFE_MMC5983MA mag;
 SparkFun_ISM330DHCX ism;
@@ -114,7 +113,7 @@ Vector getMag() {
 	M.z = ((ieee_float(mag.getMeasurementZ()) - 131072) / 131072) * 800 - magHardOffset[2];
 	M.x = M.x * magSoftOffset[0][0] + M.x * magSoftOffset[0][1] + M.x * magSoftOffset[0][2];
 	M.y = M.y * magSoftOffset[1][0] + M.y * magSoftOffset[1][1] + M.y * magSoftOffset[1][2];
-	M.z = M.z * magSoftOffset[2][0] + M.z * magSoftOffset[2][1] + M.z * magSoftOffset[2][2];
+	M.z = -1.0f * (M.z * magSoftOffset[2][0] + M.z * magSoftOffset[2][1] + M.z * magSoftOffset[2][2]);
 	return magnetometer;
 #undef M
 }
