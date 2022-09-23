@@ -6,15 +6,24 @@
 
 // the setup function runs once when you press reset or power the board
 #include "Fusion.h"
+#include "MMC5983MA.h"
+#include "I2Cdev.h"
 #include <Wire.h>
 #include <SparkFun_ISM330DHCX.h>
-#include <SparkFun_MMC5983MA_Arduino_Library.h>
+//#include <SparkFun_MMC5983MA_Arduino_Library.h>
 
-SFE_MMC5983MA mag;
+#define I2C_BUS Wire
+
+I2Cdev i2c_0(&I2C_BUS);
+
+//SFE_MMC5983MA mag;
 SparkFun_ISM330DHCX ism;
+MMC5983MA mag(&i2c_0);
 
 sfe_ism_data_t gyroData;
 sfe_ism_data_t accelData;
+
+uint32_t magData[3] = {0.0, 0.0, 0.0};
 
 FusionVector gyroscope;
 FusionVector accelerometer;
@@ -24,23 +33,24 @@ FusionAhrs ahrs;
 
 FusionEuler attitude;
 
-float gyroOffset[3] = { 0.0024f, -0.0104f, -0.0043f };
-float accelOffset[3] = { -57.73f / 1000.0f, -18.71f / 1000.0f, 7.735f / 1000.0f };
-float magHardOffset[3] = { -55.55f, 80.53f, 145.28f };
-float magSoftOffset[3][3] = { { 0.945f, 0.008f, 0.011f }, { 0.008f, 1.131f, 0.038f }, { 0.011f, 0.038f, 0.936f } };
+const float gyroOffset[3] = { 0.0024f, -0.0104f, -0.0043f };
+const float accelOffset[3] = { -0.05773f, -0.01871f, 0.007735f };
+float magOffset[3] = { 0.0, 0.0, 0.0 };
+float magBias[3] = { -0.37f, 0.53f, 1.07f };
+float magScale[3] = { 0.96, 1.13, 0.93 };
 
 unsigned long t_last = 0;
 float t_delta = 0;
 
-void getMag(FusionVector *magnetometer) {
+void getMag(FusionVector* magnetometer) {
 #define M magnetometer -> axis
-	M.x = ((float)mag.getMeasurementX() - 131072.0) * 0.0061035 - magHardOffset[0];
-	M.y = ((float)mag.getMeasurementY() - 131072.0) * 0.0061035 - magHardOffset[1];
-	M.z = ((float)mag.getMeasurementZ() - 131072.0) * 0.0061035 - magHardOffset[2];
-	M.x = M.x * magSoftOffset[0][0] + M.x * magSoftOffset[0][1] + M.x * magSoftOffset[0][2];
-	M.y = M.y * magSoftOffset[1][0] + M.y * magSoftOffset[1][1] + M.y * magSoftOffset[1][2];
-	M.z = -M.z * magSoftOffset[2][0] - M.z * magSoftOffset[2][1] - M.z * magSoftOffset[2][2];
-#undef M
+	mag.readData(magData);
+	M.x = ((float)magData[0] - 131072.0f) / 16384.0f - magBias[0];
+	M.y = ((float)magData[1] - 131072.0f) / 16384.0f - magBias[1];
+	M.z = ((float)magData[2] - 131072.0f) / 16384.0f - magBias[2];
+	M.x *= magScale[0];
+	M.y *= magScale[1];
+	M.z *= -magScale[2];
 }
 
 void offsetGyro() {
@@ -67,16 +77,13 @@ void setup() {
 	Serial.begin(115200);
 
 	Wire.begin();
+	Wire.setClock(400000);
+
+	i2c_0.I2Cscan();
 
 	if (!ism.begin())//check if ism begins
 	{
 		Serial.println(F("ism did not begin"));
-		while (1);
-	}
-
-	if (!mag.begin())//check if mag begins
-	{
-		Serial.println(F("mag did not begin"));
 		while (1);
 	}
 
@@ -88,28 +95,49 @@ void setup() {
 	}
 	Serial.println(F("ism reset"));
 
-	//reset mag
-	mag.softReset();
-	Serial.println(F("mag reset"));
+	/*mag.getOffset(magOffset);
+	Serial.println(magOffset[0]);
+	Serial.println(magOffset[1]);
+	Serial.println(magOffset[2]);*/
+
+	mag.reset();
+	mag.SET();
+	mag.init(MODR_200Hz, MBW_200Hz, MSET_100);
+	mag.selfTest();
+
+	/*
+	mag.offsetBias(magBias, magScale);
+
+	Serial.print(magBias[0]); Serial.print('\t');
+	Serial.print(magBias[1]); Serial.print('\t');
+	Serial.println(magBias[2]);
+
+	Serial.print(magScale[0]); Serial.print('\t');
+	Serial.print(magScale[1]); Serial.print('\t');
+	Serial.println(magScale[2]);
+
+	delay(5000);
+	//*/
 
 	ism.setDeviceConfig();
 	ism.setBlockDataUpdate();
 
 	// Set the output data rate and precision of the accelerometer
-	ism.setAccelDataRate(ISM_XL_ODR_104Hz);
+	ism.setAccelDataRate(ISM_XL_ODR_208Hz);
 	ism.setAccelFullScale(ISM_4g);
 
 	// Set the output data rate and precision of the gyroscope
-	ism.setGyroDataRate(ISM_GY_ODR_104Hz);
+	ism.setGyroDataRate(ISM_GY_ODR_208Hz);
 	ism.setGyroFullScale(ISM_500dps);
 
 	// Turn on the accelerometer's filter and apply settings.
 	ism.setAccelFilterLP2();
-	ism.setAccelSlopeFilter(ISM_LP_ODR_DIV_100);
+	ism.setAccelSlopeFilter(ISM_LP_ODR_DIV_10);
 
 	// Turn on the gyroscope's filter and apply settings.
 	ism.setGyroFilterLP1();
 	ism.setGyroLP1Bandwidth(ISM_MEDIUM);
+
 	Serial.println(F("Starting..."));
 
 	FusionAhrsInitialise(&ahrs);
@@ -118,7 +146,6 @@ void setup() {
 // the loop function runs over and over again until power down or reset
 void loop() {
 	t_last = millis();
-
 	ism.getAccel(&accelData);
 	ism.getGyro(&gyroData);
 	getMag(&magnetometer);
@@ -129,14 +156,16 @@ void loop() {
 	gyroscope = sfeToVector(gyroData);
 	accelerometer = sfeToVector(accelData);
 
+	//*
 	FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, t_delta);
-
+	//*/FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, t_delta);
 	attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
-
+	//*
 	Serial.print(attitude.angle.pitch); Serial.print('\t');
 	Serial.print(attitude.angle.yaw); Serial.print('\t');
 	Serial.print(attitude.angle.roll); Serial.print('\t');
-
+	//*/
+	delay(5);
 	t_delta = (millis() - t_last) / 1000.0f;
-	Serial.println(t_delta);
+	Serial.println(1.0f / t_delta);
 }

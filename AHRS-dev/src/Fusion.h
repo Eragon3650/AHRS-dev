@@ -8,8 +8,8 @@
 #ifndef FUSION_H
 #define FUSION_H
 
-//------------------------------------------------------------------------------
-// Includes
+ //------------------------------------------------------------------------------
+ // Includes
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +21,7 @@ extern "C" {
 #include "FusionCompass.h"
 #include "FusionMath.h"
 #include "FusionOffset.h"
+#include "Constants.h"
 
 #ifdef __cplusplus
 }

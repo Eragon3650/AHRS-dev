@@ -5,8 +5,8 @@
  * north using accelerometer and magnetometer measurements.
  */
 
-//------------------------------------------------------------------------------
-// Includes
+ //------------------------------------------------------------------------------
+ // Includes
 
 #include "FusionCompass.h"
 #include <math.h> // atan2f
@@ -21,15 +21,14 @@
  * @return Heading angle in degrees.
  */
 float FusionCompassCalculateHeading(const FusionVector accelerometer, const FusionVector magnetometer) {
+	// Compute direction of magnetic west (Earth's y axis)
+	const FusionVector magneticWest = FusionVectorNormalise(FusionVectorCrossProduct(accelerometer, magnetometer));
 
-    // Compute direction of magnetic west (Earth's y axis)
-    const FusionVector magneticWest = FusionVectorNormalise(FusionVectorCrossProduct(accelerometer, magnetometer));
+	// Compute direction of magnetic north (Earth's x axis)
+	const FusionVector magneticNorth = FusionVectorNormalise(FusionVectorCrossProduct(magneticWest, accelerometer));
 
-    // Compute direction of magnetic north (Earth's x axis)
-    const FusionVector magneticNorth = FusionVectorNormalise(FusionVectorCrossProduct(magneticWest, accelerometer));
-
-    // Calculate angular heading relative to magnetic north
-    return FusionRadiansToDegrees(atan2f(magneticWest.axis.x, magneticNorth.axis.x));
+	// Calculate angular heading relative to magnetic north
+	return FusionRadiansToDegrees(atan2f(magneticWest.axis.x, magneticNorth.axis.x));
 }
 
 //------------------------------------------------------------------------------

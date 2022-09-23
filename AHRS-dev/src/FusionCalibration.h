@@ -7,8 +7,8 @@
 #ifndef FUSION_CALIBRATION_H
 #define FUSION_CALIBRATION_H
 
-//------------------------------------------------------------------------------
-// Includes
+ //------------------------------------------------------------------------------
+ // Includes
 
 #include "FusionMath.h"
 
@@ -24,7 +24,7 @@
  * @return Calibrated measurement.
  */
 static inline FusionVector FusionCalibrationInertial(const FusionVector uncalibrated, const FusionMatrix misalignment, const FusionVector sensitivity, const FusionVector offset) {
-    return FusionMatrixMultiplyVector(misalignment, FusionVectorHadamardProduct(FusionVectorSubtract(uncalibrated, offset), sensitivity));
+	return FusionMatrixMultiplyVector(misalignment, FusionVectorHadamardProduct(FusionVectorSubtract(uncalibrated, offset), sensitivity));
 }
 
 /**
@@ -35,7 +35,7 @@ static inline FusionVector FusionCalibrationInertial(const FusionVector uncalibr
  * @return Calibrated measurement.
  */
 static inline FusionVector FusionCalibrationMagnetic(const FusionVector uncalibrated, const FusionMatrix softIronMatrix, const FusionVector hardIronOffset) {
-    return FusionVectorSubtract(FusionMatrixMultiplyVector(softIronMatrix, uncalibrated), hardIronOffset);
+	return FusionVectorSubtract(FusionMatrixMultiplyVector(softIronMatrix, uncalibrated), hardIronOffset);
 }
 
 #endif
