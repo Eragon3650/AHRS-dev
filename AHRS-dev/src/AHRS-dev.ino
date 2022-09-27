@@ -33,11 +33,11 @@ FusionAhrs ahrs;
 
 FusionEuler attitude;
 
-const float gyroOffset[3] = { 0.0024f, -0.0104f, -0.0043f };
-const float accelOffset[3] = { -0.05773f, -0.01871f, 0.007735f };
+const int gyroOffset[3] = { 92, -551, -249 };
+const int accelOffset[3] = { 4, -33, 9 };
 float magOffset[3] = { 0.0, 0.0, 0.0 };
-float magBias[3] = { -0.37f, 0.53f, 1.07f };
-float magScale[3] = { 0.96, 1.13, 0.93 };
+float magBias[3] = { 0.02f, 0.43f, 0.95f };
+float magScale[3] = { 0.978f, 1.286f, 0.904 };
 
 unsigned long t_last = 0;
 float t_delta = 0;
@@ -50,24 +50,24 @@ void getMag(FusionVector *magnetometer) {
 	M.z = ((float)magData[2] - 131072.0f) / 16384.0f - magBias[2];
 	M.x *= magScale[0];
 	M.y *= magScale[1];
-	M.z *= -magScale[2];
+	M.z *= magScale[2];
 }
 
 void getGyro(FusionVector *gyro) {
 #define G gyro -> axis
 	ism.getGyro(&gyroData);
-	G.x = gyroData.xData / 1000.0f - gyroOffset[0];
-	G.y = gyroData.yData / 1000.0f - gyroOffset[1];
-	G.z = gyroData.zData / 1000.0f - gyroOffset[2];
+	G.x = (gyroData.xData - gyroOffset[0] ) / 1000.0f;
+	G.y = (gyroData.yData - gyroOffset[1] ) / 1000.0f;
+	G.z = (gyroData.zData - gyroOffset[2] ) / 1000.0f;
 #undef G
 }
 
 void getAccel(FusionVector* accel) {
 #define A accel -> axis
 	ism.getAccel(&accelData);
-	A.x = accelData.xData / 1000.0f - accelOffset[0];
-	A.y = accelData.yData / 1000.0f - accelOffset[1];
-	A.z = accelData.zData / 1000.0f - accelOffset[2];
+	A.x = (accelData.xData - accelOffset[0] ) / 1000.0f;
+	A.y = (accelData.yData - accelOffset[1] ) / 1000.0f;
+	A.z = (accelData.zData - accelOffset[2] ) / 1000.0f;
 #undef G
 }
 
@@ -93,14 +93,9 @@ void setup() {
 	}
 	Serial.println(F("ism reset"));
 
-	/*mag.getOffset(magOffset);
-	Serial.println(magOffset[0]);
-	Serial.println(magOffset[1]);
-	Serial.println(magOffset[2]);*/
-
 	mag.reset();
 	mag.SET();
-	mag.init(MODR_200Hz, MBW_200Hz, MSET_100);
+	mag.init(MODR_1000Hz, MBW_200Hz, MSET_100);
 	mag.selfTest();
 
 	/*
@@ -121,20 +116,20 @@ void setup() {
 	ism.setBlockDataUpdate();
 
 	// Set the output data rate and precision of the accelerometer
-	ism.setAccelDataRate(ISM_XL_ODR_208Hz);
+	ism.setAccelDataRate(ISM_XL_ODR_6667Hz);
 	ism.setAccelFullScale(ISM_4g);
 
 	// Set the output data rate and precision of the gyroscope
-	ism.setGyroDataRate(ISM_GY_ODR_208Hz);
+	ism.setGyroDataRate(ISM_GY_ODR_6667Hz);
 	ism.setGyroFullScale(ISM_500dps);
 
 	// Turn on the accelerometer's filter and apply settings.
-	ism.setAccelFilterLP2();
-	ism.setAccelSlopeFilter(ISM_LP_ODR_DIV_10);
+	ism.setAccelFilterLP2(ISM_HP_ODR_DIV_10);
+	ism.setAccelSlopeFilter(ISM_HP_ODR_DIV_20);
 
 	// Turn on the gyroscope's filter and apply settings.
-	ism.setGyroFilterLP1();
-	ism.setGyroLP1Bandwidth(ISM_MEDIUM);
+	ism.setGyroFilterLP1(ISM_HP_FILTER_16mHz);
+	ism.setGyroLP1Bandwidth(ISM_STRONG);
 
 	Serial.println(F("Starting..."));
 
@@ -143,17 +138,13 @@ void setup() {
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-	t_last = millis();
+	t_last = micros();
 	getGyro(&gyroscope);
+	getAccel(&accelerometer);
+
+	/*
 	getMag(&magnetometer);
 
-	offsetAccel();
-	offsetGyro();
-
-	gyroscope = sfeToVector(gyroData);
-	accelerometer = sfeToVector(accelData);
-
-	//*
 	FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, t_delta);
 	//*/FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, t_delta);
 	attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
@@ -163,6 +154,6 @@ void loop() {
 	Serial.print(attitude.angle.roll); Serial.print('\t');
 	//*/
 	delay(5);
-	t_delta = (millis() - t_last) / 1000.0f;
+	t_delta = (micros() - t_last) / 1000000.0f;
 	Serial.println(1.0f / t_delta);
 }
