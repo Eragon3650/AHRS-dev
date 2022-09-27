@@ -42,7 +42,7 @@ float magScale[3] = { 0.96, 1.13, 0.93 };
 unsigned long t_last = 0;
 float t_delta = 0;
 
-void getMag(FusionVector* magnetometer) {
+void getMag(FusionVector *magnetometer) {
 #define M magnetometer -> axis
 	mag.readData(magData);
 	M.x = ((float)magData[0] - 131072.0f) / 16384.0f - magBias[0];
@@ -53,24 +53,22 @@ void getMag(FusionVector* magnetometer) {
 	M.z *= -magScale[2];
 }
 
-void offsetGyro() {
-	gyroData.xData -= gyroOffset[0];
-	gyroData.yData -= gyroOffset[1];
-	gyroData.zData -= gyroOffset[2];
+void getGyro(FusionVector *gyro) {
+#define G gyro -> axis
+	ism.getGyro(&gyroData);
+	G.x = gyroData.xData / 1000.0f - gyroOffset[0];
+	G.y = gyroData.yData / 1000.0f - gyroOffset[1];
+	G.z = gyroData.zData / 1000.0f - gyroOffset[2];
+#undef G
 }
 
-void offsetAccel() {
-	accelData.xData -= accelOffset[0];
-	accelData.yData -= accelOffset[1];
-	accelData.zData -= accelOffset[2];
-}
-
-FusionVector sfeToVector(sfe_ism_data_t data) {
-	FusionVector vector;
-	vector.axis.x = data.xData / 1000.0f;
-	vector.axis.y = data.yData / 1000.0f;
-	vector.axis.z = data.zData / 1000.0f;
-	return vector;
+void getAccel(FusionVector* accel) {
+#define A accel -> axis
+	ism.getAccel(&accelData);
+	A.x = accelData.xData / 1000.0f - accelOffset[0];
+	A.y = accelData.yData / 1000.0f - accelOffset[1];
+	A.z = accelData.zData / 1000.0f - accelOffset[2];
+#undef G
 }
 
 void setup() {
@@ -146,8 +144,7 @@ void setup() {
 // the loop function runs over and over again until power down or reset
 void loop() {
 	t_last = millis();
-	ism.getAccel(&accelData);
-	ism.getGyro(&gyroData);
+	getGyro(&gyroscope);
 	getMag(&magnetometer);
 
 	offsetAccel();

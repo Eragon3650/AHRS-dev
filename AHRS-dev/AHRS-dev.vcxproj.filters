@@ -45,6 +45,12 @@
     <ClInclude Include="src\FusionOffset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\I2Cdev.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MMC5983MA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FusionAhrs.c">
@@ -54,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\FusionOffset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\I2Cdev.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MMC5983MA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
