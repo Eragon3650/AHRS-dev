@@ -6,19 +6,12 @@
 
 // the setup function runs once when you press reset or power the board
 #include "Fusion.h"
-#include "MMC5983MA.h"
-#include "I2Cdev.h"
-#include <Wire.h>
+#include <SPI.h>
 #include <SparkFun_ISM330DHCX.h>
-//#include <SparkFun_MMC5983MA_Arduino_Library.h>
+#include <SparkFun_MMC5983MA_Arduino_Library.h>
 
-#define I2C_BUS Wire
-
-I2Cdev i2c_0(&I2C_BUS);
-
-//SFE_MMC5983MA mag;
-SparkFun_ISM330DHCX ism;
-MMC5983MA mag(&i2c_0);
+SFE_MMC5983MA mag;
+SparkFun_ISM330DHCX_SPI ism;
 
 sfe_ism_data_t gyroData;
 sfe_ism_data_t accelData;
@@ -41,7 +34,7 @@ float magScale[3] = { 0.978f, 1.286f, 0.904 };
 
 unsigned long t_last = 0;
 float t_delta = 0;
-
+/*
 void getMag(FusionVector *magnetometer) {
 #define M magnetometer -> axis
 	mag.readData(magData);
@@ -51,7 +44,7 @@ void getMag(FusionVector *magnetometer) {
 	M.x *= magScale[0];
 	M.y *= magScale[1];
 	M.z *= magScale[2];
-}
+}*/
 
 void getGyro(FusionVector *gyro) {
 #define G gyro -> axis
@@ -72,14 +65,12 @@ void getAccel(FusionVector* accel) {
 }
 
 void setup() {
+	SPI.begin();
 	Serial.begin(115200);
+	pinMode(SS, OUTPUT);
+	digitalWrite(SS, HIGH);
 
-	Wire.begin();
-	Wire.setClock(400000);
-
-	i2c_0.I2Cscan();
-
-	if (!ism.begin())//check if ism begins
+	if (!ism.begin(SS))//check if ism begins
 	{
 		Serial.println(F("ism did not begin"));
 		while (1);
@@ -92,11 +83,11 @@ void setup() {
 		delay(1);
 	}
 	Serial.println(F("ism reset"));
-
+/*
 	mag.reset();
 	mag.SET();
 	mag.init(MODR_1000Hz, MBW_200Hz, MSET_100);
-	mag.selfTest();
+	mag.selfTest();*/
 
 	/*
 	mag.offsetBias(magBias, magScale);
