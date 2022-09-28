@@ -134,7 +134,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties arduino.upload.port="usb:0/140000/0/2" config.Debug.customdebug_teensy40_debugger_type="universal" config.Debug.customdebug_teensy40_vm_disable_optimization="vm_disable_opt_default" custom_teensy40_opt="o3std" custom_teensy40_speed="600" custom_teensy40_usb="serial" debug.view.DigitalPins="" />
+      <UserProperties arduino.upload.port="usb:0/140000/0/2" config.Debug.customdebug_teensy40_debugger_type="universal" config.Debug.customdebug_teensy40_vm_disable_optimization="vm_disable_opt_default" custom_teensy40_opt="o3std" custom_teensy40_speed="600" custom_teensy40_usb="serial" debug.view.DigitalPins="" VM.DebugTextMessages.TraceWindow="0" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

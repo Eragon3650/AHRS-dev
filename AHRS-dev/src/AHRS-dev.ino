@@ -10,13 +10,12 @@
 #include "I2Cdev.h"
 #include <Wire.h>
 #include <SparkFun_ISM330DHCX.h>
-//#include <SparkFun_MMC5983MA_Arduino_Library.h>
 
 #define I2C_BUS Wire
-
 I2Cdev i2c_0(&I2C_BUS);
 
-//SFE_MMC5983MA mag;
+#define FREQUENCY 300
+
 SparkFun_ISM330DHCX ism;
 MMC5983MA mag(&i2c_0);
 
@@ -30,12 +29,12 @@ FusionVector accelerometer;
 FusionVector magnetometer;
 
 FusionAhrs ahrs;
+FusionOffset offset;
 
 FusionEuler attitude;
 
 const int gyroOffset[3] = { 92, -551, -249 };
 const int accelOffset[3] = { 4, -33, 9 };
-float magOffset[3] = { 0.0, 0.0, 0.0 };
 float magBias[3] = { 0.02f, 0.43f, 0.95f };
 float magScale[3] = { 0.978f, 1.286f, 0.904 };
 
@@ -95,7 +94,7 @@ void setup() {
 
 	mag.reset();
 	mag.SET();
-	mag.init(MODR_1000Hz, MBW_200Hz, MSET_100);
+	mag.init(MODR_200Hz, MBW_100Hz, MSET_100);
 	mag.selfTest();
 
 	/*
@@ -133,6 +132,7 @@ void setup() {
 
 	Serial.println(F("Starting..."));
 
+	FusionOffsetInitialise(&offset, FREQUENCY);
 	FusionAhrsInitialise(&ahrs);
 }
 
@@ -142,9 +142,10 @@ void loop() {
 	getGyro(&gyroscope);
 	getAccel(&accelerometer);
 
+	gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+
 	/*
 	getMag(&magnetometer);
-
 	FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, t_delta);
 	//*/FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, t_delta);
 	attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
@@ -153,7 +154,7 @@ void loop() {
 	Serial.print(attitude.angle.yaw); Serial.print('\t');
 	Serial.print(attitude.angle.roll); Serial.print('\t');
 	//*/
-	delay(5);
+	delay((1000 / FREQUENCY) - (micros() - t_last) / 1000);
 	t_delta = (micros() - t_last) / 1000000.0f;
 	Serial.println(1.0f / t_delta);
 }
