@@ -154,7 +154,7 @@ void loop() {
 	Serial.print(attitude.angle.yaw); Serial.print('\t');
 	Serial.print(attitude.angle.roll); Serial.print('\t');
 	//*/
-	delay((1000 / FREQUENCY) - (micros() - t_last) / 1000);
+	delay(3.5 - (micros() - t_last) / 1000);
 	t_delta = (micros() - t_last) / 1000000.0f;
 	Serial.println(1.0f / t_delta);
 }
