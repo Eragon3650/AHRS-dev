@@ -51,6 +51,12 @@
     <ClInclude Include="src\MMC5983MA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ism330dhcx_reg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ISM330DHCXSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FusionAhrs.c">
@@ -66,6 +72,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MMC5983MA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ism330dhcx_reg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ISM330DHCXSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
