@@ -10,13 +10,14 @@
 #include "I2Cdev.h"
 #include <Wire.h>
 #include <SPI.h>
-#include <SparkFun_ISM330DHCX.h>
+#include "ISM330DHCX_src/SparkFun_ISM330DHCX.h"
 #include <Adafruit_GPS.h>
+
 //#include <Adafruit_Sensor.h>
 //#include <Adafruit_BMP3XX.h>
 
-#define I2C_BUS Wire
-I2Cdev i2c_0(&I2C_BUS);
+//#define I2C_BUS Wire
+//I2Cdev i2c_0(&I2C_BUS);
 
 #define GPSSerial Serial4
 Adafruit_GPS GPS(&GPSSerial);
@@ -135,7 +136,6 @@ void setup() {
 
 	Wire.begin();
 	Wire.setClock(400000);
-	i2c_0.I2Cscan();
 
 	//*
 	GPS.begin(9600);
@@ -231,7 +231,7 @@ void loop() {
 	}
 	//*/
 
-	if (executeTime >= 5000) {
+	if (executeTime >= 1000) {
 		t_delta = executeTime / 1000000.0;
 		executeTime = 0;
 		getGyro(&gyroscope);

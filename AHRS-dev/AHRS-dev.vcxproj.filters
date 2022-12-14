@@ -48,7 +48,31 @@
     <ClInclude Include="src\I2Cdev.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MMC5983MA.h">
+    <ClInclude Include="src\ISM330DHCX_src\st_src\ism330dhcx_reg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ISM330DHCX_src\sfe_bus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ISM330DHCX_src\sfe_ism_shim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ISM330DHCX_src\sfe_ism330dhcx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ISM330DHCX_src\sfe_ism330dhcx_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ISM330DHCX_src\SparkFun_ISM330DHCX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MMC5983MA_src\SparkFun_MMC5983MA_Arduino_Library.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MMC5983MA_src\SparkFun_MMC5983MA_Arduino_Library_Constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MMC5983MA_src\SparkFun_MMC5983MA_IO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,7 +89,22 @@
     <ClCompile Include="src\I2Cdev.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MMC5983MA.cpp">
+    <ClCompile Include="src\ISM330DHCX_src\st_src\ism330dhcx_reg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ISM330DHCX_src\sfe_bus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ISM330DHCX_src\sfe_ism_shim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ISM330DHCX_src\sfe_ism330dhcx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MMC5983MA_src\SparkFun_MMC5983MA_Arduino_Library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MMC5983MA_src\SparkFun_MMC5983MA_IO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
