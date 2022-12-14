@@ -17,7 +17,7 @@
 /**
  * @brief Cutoff frequency in Hz.
  */
-#define CUTOFF_FREQUENCY (0.02f)
+#define CUTOFF_FREQUENCY (0.02)
 
  /**
   * @brief Timeout in seconds.
@@ -27,7 +27,7 @@
   /**
    * @brief Threshold in degrees per second.
    */
-#define THRESHOLD (3.0f)
+#define THRESHOLD (3.0)
 
    //------------------------------------------------------------------------------
    // Functions
@@ -38,7 +38,7 @@
 	* @param sampleRate Sample rate in Hz.
 	*/
 void FusionOffsetInitialise(FusionOffset* const offset, const unsigned int sampleRate) {
-	offset->filterCoefficient = 2.0f * (float)M_PI * CUTOFF_FREQUENCY * (1.0f / (float)sampleRate);
+	offset->filterCoefficient = 2.0 * (double)M_PI * CUTOFF_FREQUENCY * (1.0 / (double)sampleRate);
 	offset->timeout = TIMEOUT * sampleRate;
 	offset->timer = 0;
 	offset->gyroscopeOffset = FUSION_VECTOR_ZERO;
@@ -56,7 +56,7 @@ FusionVector FusionOffsetUpdate(FusionOffset* const offset, FusionVector gyrosco
 	gyroscope = FusionVectorSubtract(gyroscope, offset->gyroscopeOffset);
 
 	// Reset timer if gyroscope not stationary
-	if ((fabs(gyroscope.axis.x) > THRESHOLD) || (fabs(gyroscope.axis.y) > THRESHOLD) || (fabs(gyroscope.axis.z) > THRESHOLD)) {
+	if ((abs(gyroscope.axis.x) > THRESHOLD) || (abs(gyroscope.axis.y) > THRESHOLD) || (abs(gyroscope.axis.z) > THRESHOLD)) {
 		offset->timer = 0;
 		return gyroscope;
 	}
