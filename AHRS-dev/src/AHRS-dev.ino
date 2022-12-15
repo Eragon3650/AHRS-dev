@@ -234,7 +234,7 @@ void loop() {
 	}
 	//*/
 
-	if (executeTime >= 800) {
+	if (executeTime >= 300) {
 		t_delta = executeTime * 0.000001;
 		executeTime = 0;
 		getGyro(&gyroscope);
