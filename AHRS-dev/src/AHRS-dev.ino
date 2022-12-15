@@ -5,19 +5,14 @@
 */
 
 // the setup function runs once when you press reset or power the board
+#include <i2c_driver.h>
+#include <i2c_driver_wire.h>
+#include "imx_rt1060/imx_rt1060_i2c_driver.h"
 #include "Fusion.h"
-//#include "MMC5983MA.h"
-#include "I2Cdev.h"
-#include <Wire.h>
+#include "MMC5983MA_src/SparkFun_MMC5983MA_Arduino_Library.h"
 #include <SPI.h>
 #include "ISM330DHCX_src/SparkFun_ISM330DHCX.h"
-#include <Adafruit_GPS.h>
-
-//#include <Adafruit_Sensor.h>
-//#include <Adafruit_BMP3XX.h>
-
-//#define I2C_BUS Wire
-//I2Cdev i2c_0(&I2C_BUS);
+#include "GPS_src/Adafruit_GPS.h"
 
 #define GPSSerial Serial4
 Adafruit_GPS GPS(&GPSSerial);
@@ -37,8 +32,6 @@ float altitudeAdjusted = 0.0f;
 float heightAdjusted = 0.0f;
 
 SparkFun_ISM330DHCX ism;
-sfe_ism_data_t gyroData;
-sfe_ism_data_t accelData;
 
 FusionVector gyroscope;
 FusionVector accelerometer;
@@ -46,12 +39,10 @@ FusionVector accelerometer;
 const int gyroOffset[3] = { 92, -551, -249 };
 const int accelOffset[3] = { 4, -33, 9 };
 
-//#define USE_MAG
+#define USE_MAG
 
 #ifdef USE_MAG
-MMC5983MA mag(&i2c_0);
-
-uint32_t magData[3] = { 0, 0, 0 };
+SFE_MMC5983MA mag;
 
 const double magBias[3] = { 0.05, 0.28, 1.03 };
 const double magScale[3] = { 0.978, 1.286, 0.904 };
@@ -103,10 +94,13 @@ void altimeterCalibrate(int t) {
 #ifdef USE_MAG
 void getMag(FusionVector *magnetometer) {
 #define M magnetometer -> axis
-	mag.readData(magData);
-	M.x = ((double)magData[0] - 131072.0) / 16384.0 - magBias[0];
-	M.y = ((double)magData[1] - 131072.0) / 16384.0 - magBias[1];
-	M.z = ((double)magData[2] - 131072.0) / 16384.0 - magBias[2];
+	uint32_t magDataX = 0;
+	uint32_t magDataY = 0;
+	uint32_t magDataZ = 0;
+	mag.readFieldsXYZ(&magDataX, &magDataY, &magDataZ);
+	M.x = ((double)magDataX - 131072.0) / 131072.0 - magBias[0];
+	M.y = ((double)magDataY - 131072.0) / 131072.0 - magBias[1];
+	M.z = ((double)magDataZ - 131072.0) / 131072.0 - magBias[2];
 	M.x *= magScale[0];
 	M.y *= magScale[1];
 	M.z *= magScale[2];
@@ -115,34 +109,42 @@ void getMag(FusionVector *magnetometer) {
 
 void getGyro(FusionVector *gyro) {
 #define G gyro -> axis
+	sfe_ism_data_t gyroData;
 	ism.getGyro(&gyroData);
-	G.x = (gyroData.xData - gyroOffset[0] ) / 1000.0;
-	G.y = (gyroData.yData - gyroOffset[1] ) / 1000.0;
-	G.z = (gyroData.zData - gyroOffset[2] ) / 1000.0;
+	G.x = (gyroData.xData - gyroOffset[0] ) * 0.001;
+	G.y = (gyroData.yData - gyroOffset[1] ) * 0.001;
+	G.z = (gyroData.zData - gyroOffset[2] ) * 0.001;
 #undef G
 }
 
 void getAccel(FusionVector* accel) {
 #define A accel -> axis
+	sfe_ism_data_t accelData;
 	ism.getAccel(&accelData);
-	A.x = (accelData.xData - accelOffset[0] ) / 1000.0;
-	A.y = (accelData.yData - accelOffset[1] ) / 1000.0;
-	A.z = (accelData.zData - accelOffset[2] ) / 1000.0;
+	A.x = (accelData.xData - accelOffset[0] ) * 0.001;
+	A.y = (accelData.yData - accelOffset[1] ) * 0.001;
+	A.z = (accelData.zData - accelOffset[2] ) * 0.001;
 #undef A
 }
 
 void setup() {
 	Serial.begin(115200);
 
-	Wire.begin();
 	Wire.setClock(400000);
+	Wire.begin();
 
 	//*
 	GPS.begin(9600);
-	GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+	GPS.sendCommand(PMTK_SET_BAUD_9600);
 	GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
-	GPS.sendCommand(PGCMD_ANTENNA);
+	GPS.sendCommand(PMTK_API_SET_FIX_CTL_1HZ);// 1 Hz update rate
+	// For the parsing code to work nicely and have time to sort thru the data, and
+	// print it out we don't suggest using anything higher than 1 Hz
 
+	// Request updates on antenna status, comment out to keep quiet
+	GPS.sendCommand(PGCMD_ANTENNA);
+	GPS.sendCommand(PMTK_ENABLE_SBAS);
+	GPS.sendCommand(PMTK_ENABLE_WAAS);
 	delay(1000);
 
 	// Ask for firmware version
@@ -161,6 +163,28 @@ void setup() {
 	altimeterCalibrate(ALTIMETER_CALIBRATE_TIME);
 	*/
 
+#ifdef USE_MAG
+
+	if (!mag.begin())//check if ism begins
+	{
+		Serial.println(F("mag did not begin"));
+		while (1);
+	}
+
+	mag.softReset();
+
+	Serial.println(F("MMC5983MA connected"));
+
+	mag.setFilterBandwidth(800);
+
+	mag.setContinuousModeFrequency(100);
+
+	mag.enableAutomaticSetReset();
+
+	mag.enableContinuousMode();
+
+#endif
+
 	if (!ism.begin())//check if ism begins
 	{
 		Serial.println(F("ism did not begin"));
@@ -174,27 +198,6 @@ void setup() {
 		delay(1);
 	}
 	Serial.println(F("ism reset"));
-
-#ifdef USE_MAG
-	mag.reset();
-	mag.SET();
-	mag.init(MODR_1000Hz, MBW_100Hz, MSET_25);
-	mag.selfTest();
-
-	/*
-	mag.offsetBias(magBias, magScale);
-
-	Serial.print(magBias[0]); Serial.print('\t');
-	Serial.print(magBias[1]); Serial.print('\t');
-	Serial.println(magBias[2]);
-
-	Serial.print(magScale[0]); Serial.print('\t');
-	Serial.print(magScale[1]); Serial.print('\t');
-	Serial.println(magScale[2]);
-
-	delay(5000);
-	//*/
-#endif
 
 	ism.setDeviceConfig();
 	ism.setBlockDataUpdate();
@@ -231,8 +234,8 @@ void loop() {
 	}
 	//*/
 
-	if (executeTime >= 1000) {
-		t_delta = executeTime / 1000000.0;
+	if (executeTime >= 800) {
+		t_delta = executeTime * 0.000001;
 		executeTime = 0;
 		getGyro(&gyroscope);
 		getAccel(&accelerometer);
@@ -251,7 +254,7 @@ void loop() {
 	if (serialTimer >= 40) {
 		serialTimer = 0;
 
-		Serial.print(1 / t_delta); Serial.print('\t');
+		Serial.print(1.0 / t_delta); Serial.print('\t');
 
 		Serial.print(attitude.angle.pitch, 1); Serial.print('\t');
 		Serial.print(attitude.angle.yaw, 1); Serial.print('\t');
@@ -267,9 +270,8 @@ void loop() {
 		//*
 		if (gpsStatus) {
 			Serial.print(GPS.latitudeDegrees, 6); Serial.print(F(", "));
-			Serial.print(GPS.longitudeDegrees, 6); Serial.print(F('\t'));
-			Serial.print(GPS.satellites); Serial.print(F('\t'));
-			Serial.print(GPS.altitude); Serial.print(F('\t'));
+			Serial.print(GPS.longitudeDegrees, 6); Serial.print('\t');
+			Serial.print(GPS.satellites); Serial.print('\t');
 		}
 		//*/
 

@@ -47,7 +47,7 @@
 
 
 
-#include <Wire.h>
+#include <i2c_driver_wire.h>
 #include <SPI.h>
 
 namespace sfe_ISM330DHCX {

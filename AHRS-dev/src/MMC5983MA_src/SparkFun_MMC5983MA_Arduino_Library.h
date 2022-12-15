@@ -16,7 +16,7 @@
 #define _SPARKFUN_MMC5983MA_
 
 #include <Arduino.h>
-#include <Wire.h>
+#include <i2c_driver_wire.h>
 #include <SPI.h>
 #include "SparkFun_MMC5983MA_IO.h"
 #include "SparkFun_MMC5983MA_Arduino_Library_Constants.h"

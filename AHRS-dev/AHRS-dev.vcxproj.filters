@@ -75,6 +75,33 @@
     <ClInclude Include="src\MMC5983MA_src\SparkFun_MMC5983MA_IO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\GPS_src\Adafruit_GPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GPS_src\Adafruit_PMTK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GPS_src\NMEA_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I2C_Teensy\imx_rt1060\imx_rt1060.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I2C_Teensy\imx_rt1060\imx_rt1060_i2c_driver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I2C_Teensy\i2c_device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I2C_Teensy\i2c_driver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I2C_Teensy\i2c_driver_wire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I2C_Teensy\i2c_register_slave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FusionAhrs.c">
@@ -105,6 +132,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MMC5983MA_src\SparkFun_MMC5983MA_IO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GPS_src\Adafruit_GPS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GPS_src\NMEA_build.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GPS_src\NMEA_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GPS_src\NMEA_parse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\I2C_Teensy\imx_rt1060\imx_rt1060_i2c_driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\I2C_Teensy\i2c_driver_wire.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\I2C_Teensy\i2c_register_slave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 #include "sfe_ism330dhcx.h"
 #include "sfe_bus.h"
-#include <Wire.h>
+#include <i2c_driver_wire.h>
 #include <SPI.h>
 
 class SparkFun_ISM330DHCX : public QwDevISM330DHCX

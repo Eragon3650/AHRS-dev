@@ -16,7 +16,7 @@
 #define _SPARKFUN_MMC5983MA_IO_
 
 #include <Arduino.h>
-#include <Wire.h>
+#include <i2c_driver_wire.h>
 #include <SPI.h>
 
 class SFE_MMC5983MA_IO

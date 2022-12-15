@@ -73,7 +73,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\Wire;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\SPI;$(ProjectDir)..\..\..\..\OneDrive\Documents\Arduino\libraries\Adafruit_GPS_Library\src;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\Wire\utility;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\tr1;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\arm-none-eabi;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\avr;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\debug;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\util;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)..\..\..\..\OneDrive\Documents\Arduino\libraries\teensy4_i2c-1.1.0\src;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\SPI;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\tr1;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\arm-none-eabi;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\avr;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\debug;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\util;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\teensy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>$(ProjectDir)..\__vm\.AHRS-dev.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
       <PreprocessorDefinitions>__HARDWARE_imxrt1062__;__HARDWARE_IMXRT1062__;_VMDEBUG=1;__IMXRT1062__;TEENSYDUINO=157;ARDUINO=108019;ARDUINO_TEENSY40;F_CPU=600000000;USB_SERIAL;LAYOUT_US_ENGLISH;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -118,7 +118,16 @@
     <ClInclude Include="src\FusionCompass.h" />
     <ClInclude Include="src\FusionMath.h" />
     <ClInclude Include="src\FusionOffset.h" />
+    <ClInclude Include="src\GPS_src\Adafruit_GPS.h" />
+    <ClInclude Include="src\GPS_src\Adafruit_PMTK.h" />
+    <ClInclude Include="src\GPS_src\NMEA_data.h" />
     <ClInclude Include="src\I2Cdev.h" />
+    <ClInclude Include="src\I2C_Teensy\i2c_device.h" />
+    <ClInclude Include="src\I2C_Teensy\i2c_driver.h" />
+    <ClInclude Include="src\I2C_Teensy\i2c_driver_wire.h" />
+    <ClInclude Include="src\I2C_Teensy\i2c_register_slave.h" />
+    <ClInclude Include="src\I2C_Teensy\imx_rt1060\imx_rt1060.h" />
+    <ClInclude Include="src\I2C_Teensy\imx_rt1060\imx_rt1060_i2c_driver.h" />
     <ClInclude Include="src\ISM330DHCX_src\sfe_bus.h" />
     <ClInclude Include="src\ISM330DHCX_src\sfe_ism330dhcx.h" />
     <ClInclude Include="src\ISM330DHCX_src\sfe_ism330dhcx_defs.h" />
@@ -134,7 +143,14 @@
     <ClCompile Include="src\FusionAhrs.c" />
     <ClCompile Include="src\FusionCompass.c" />
     <ClCompile Include="src\FusionOffset.c" />
+    <ClCompile Include="src\GPS_src\Adafruit_GPS.cpp" />
+    <ClCompile Include="src\GPS_src\NMEA_build.cpp" />
+    <ClCompile Include="src\GPS_src\NMEA_data.cpp" />
+    <ClCompile Include="src\GPS_src\NMEA_parse.cpp" />
     <ClCompile Include="src\I2Cdev.cpp" />
+    <ClCompile Include="src\I2C_Teensy\i2c_driver_wire.cpp" />
+    <ClCompile Include="src\I2C_Teensy\i2c_register_slave.cpp" />
+    <ClCompile Include="src\I2C_Teensy\imx_rt1060\imx_rt1060_i2c_driver.cpp" />
     <ClCompile Include="src\ISM330DHCX_src\sfe_bus.cpp" />
     <ClCompile Include="src\ISM330DHCX_src\sfe_ism330dhcx.cpp" />
     <ClCompile Include="src\ISM330DHCX_src\sfe_ism_shim.cpp" />
