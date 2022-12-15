@@ -49,7 +49,7 @@
 #define ISM_AGGRESSIVE    6
 #define ISM_XTREME        7
 
-// Gyro high performance filters												
+// Gyro high performance filters
 #define ISM_HP_FILTER_NONE    0x00
 #define ISM_HP_FILTER_16mHz   0x80
 #define ISM_HP_FILTER_65mHz   0x81

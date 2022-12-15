@@ -24,27 +24,26 @@
         cb(code);               \
     }
 
-
 // Registers definitions
-static const uint8_t X_OUT_0_REG    = 0x0;
-static const uint8_t X_OUT_1_REG    = 0X01;
-static const uint8_t Y_OUT_0_REG    = 0x02;
-static const uint8_t Y_OUT_1_REG    = 0x03;
-static const uint8_t Z_OUT_0_REG    = 0x04;
-static const uint8_t Z_OUT_1_REG    = 0x05;
-static const uint8_t XYZ_OUT_2_REG  = 0x06;
-static const uint8_t T_OUT_REG      = 0x07;
-static const uint8_t STATUS_REG     = 0x08;
+static const uint8_t X_OUT_0_REG = 0x0;
+static const uint8_t X_OUT_1_REG = 0X01;
+static const uint8_t Y_OUT_0_REG = 0x02;
+static const uint8_t Y_OUT_1_REG = 0x03;
+static const uint8_t Z_OUT_0_REG = 0x04;
+static const uint8_t Z_OUT_1_REG = 0x05;
+static const uint8_t XYZ_OUT_2_REG = 0x06;
+static const uint8_t T_OUT_REG = 0x07;
+static const uint8_t STATUS_REG = 0x08;
 static const uint8_t INT_CTRL_0_REG = 0x09;
 static const uint8_t INT_CTRL_1_REG = 0x0a;
 static const uint8_t INT_CTRL_2_REG = 0x0b;
 static const uint8_t INT_CTRL_3_REG = 0x0c;
-static const uint8_t PROD_ID_REG    = 0x2f;
-static const uint8_t DUMMY          = 0x0;
-									
-// Constants definitions            
-static const uint8_t I2C_ADDR       = 0x30;
-static const uint8_t PROD_ID        = 0x30;
+static const uint8_t PROD_ID_REG = 0x2f;
+static const uint8_t DUMMY = 0x0;
+
+// Constants definitions
+static const uint8_t I2C_ADDR = 0x30;
+static const uint8_t PROD_ID = 0x30;
 
 // Bits definitions
 #define MEAS_M_DONE                 (1 << 0)
@@ -81,14 +80,14 @@ static const uint8_t PROD_ID        = 0x30;
 
 enum class SF_MMC5983MA_ERROR
 {
-  NONE,
-  I2C_INITIALIZATION_ERROR,
-  SPI_INITIALIZATION_ERROR,
-  INVALID_DEVICE,
-  BUS_ERROR,
-  INVALID_FILTER_BANDWIDTH,
-  INVALID_CONTINUOUS_FREQUENCY,
-  INVALID_PERIODIC_SAMPLES
+	NONE,
+	I2C_INITIALIZATION_ERROR,
+	SPI_INITIALIZATION_ERROR,
+	INVALID_DEVICE,
+	BUS_ERROR,
+	INVALID_FILTER_BANDWIDTH,
+	INVALID_CONTINUOUS_FREQUENCY,
+	INVALID_PERIODIC_SAMPLES
 };
 
 #endif

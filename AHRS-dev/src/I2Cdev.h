@@ -73,10 +73,10 @@ THE SOFTWARE.
 // -----------------------------------------------------------------------------
 #define I2CDEV_ARDUINO_WIRE         1 // Wire object from Arduino
 #define I2CDEV_BUILTIN_NBWIRE       2 // Tweaked Wire object from Gene Knight's NBWire project
-                                      // ^^^ NBWire implementation is still buggy w/some interrupts!
+									  // ^^^ NBWire implementation is still buggy w/some interrupts!
 #define I2CDEV_BUILTIN_FASTWIRE     3 // FastWire object from Francesco Ferrara's project
 #define I2CDEV_I2CMASTER_LIBRARY    4 // I2C object from DSSCircuits I2C-Master Library at https://github.com/DSSCircuits/I2C-Master-Library
-#define I2CDEV_BUILTIN_SBWIRE	    5 // I2C object from Shuning (Steve) Bian's SBWire Library at https://github.com/freespace/SBWire 
+#define I2CDEV_BUILTIN_SBWIRE	    5 // I2C object from Shuning (Steve) Bian's SBWire Library at https://github.com/freespace/SBWire
 #define I2CDEV_TEENSY_3X_WIRE       6 // Teensy 3.x support using i2c_t3 library
 
 // -----------------------------------------------------------------------------
@@ -112,16 +112,16 @@ THE SOFTWARE.
 
 #ifndef I2CDEVLIB_WIRE_BUFFER_LENGTH
 #if defined(I2C_BUFFER_LENGTH)
-    // Arduino ESP32 core Wire uses this
+	// Arduino ESP32 core Wire uses this
 #define I2CDEVLIB_WIRE_BUFFER_LENGTH I2C_BUFFER_LENGTH
 #elif defined(BUFFER_LENGTH)
-    // Arduino AVR core Wire and many others use this
+	// Arduino AVR core Wire and many others use this
 #define I2CDEVLIB_WIRE_BUFFER_LENGTH BUFFER_LENGTH
 #elif defined(SERIAL_BUFFER_SIZE)
-    // Arduino SAMD core Wire uses this
+	// Arduino SAMD core Wire uses this
 #define I2CDEVLIB_WIRE_BUFFER_LENGTH SERIAL_BUFFER_SIZE
 #else
-    // should be a safe fallback, though possibly inefficient
+	// should be a safe fallback, though possibly inefficient
 #define I2CDEVLIB_WIRE_BUFFER_LENGTH 32
 #endif
 #endif
@@ -131,27 +131,27 @@ THE SOFTWARE.
 
 class I2Cdev {
 public:
-    I2Cdev();
+	I2Cdev();
 
-    static int8_t readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
-    static int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readByte(uint8_t devAddr, uint8_t regAddr, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readWord(uint8_t devAddr, uint8_t regAddr, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
+	static int8_t readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data, uint16_t timeout = I2Cdev::readTimeout, void* wireObj = 0);
 
-    static bool writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data, void* wireObj = 0);
-    static bool writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data, void* wireObj = 0);
-    static bool writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data, void* wireObj = 0);
-    static bool writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data, void* wireObj = 0);
-    static bool writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data, void* wireObj = 0);
-    static bool writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data, void* wireObj = 0);
-    static bool writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data, void* wireObj = 0);
-    static bool writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data, void* wireObj = 0);
+	static bool writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data, void* wireObj = 0);
+	static bool writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data, void* wireObj = 0);
+	static bool writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t data, void* wireObj = 0);
+	static bool writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t data, void* wireObj = 0);
+	static bool writeByte(uint8_t devAddr, uint8_t regAddr, uint8_t data, void* wireObj = 0);
+	static bool writeWord(uint8_t devAddr, uint8_t regAddr, uint16_t data, void* wireObj = 0);
+	static bool writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t* data, void* wireObj = 0);
+	static bool writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t* data, void* wireObj = 0);
 
-    static uint16_t readTimeout;
+	static uint16_t readTimeout;
 };
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
@@ -185,16 +185,16 @@ public:
 
 class Fastwire {
 private:
-    static boolean waitInt();
+	static boolean waitInt();
 
 public:
-    static void setup(int khz, boolean pullup);
-    static byte beginTransmission(byte device);
-    static byte write(byte value);
-    static byte writeBuf(byte device, byte address, byte* data, byte num);
-    static byte readBuf(byte device, byte address, byte* data, byte num);
-    static void reset();
-    static byte stop();
+	static void setup(int khz, boolean pullup);
+	static byte beginTransmission(byte device);
+	static byte write(byte value);
+	static byte writeBuf(byte device, byte address, byte* data, byte num);
+	static byte readBuf(byte device, byte address, byte* data, byte num);
+	static void reset();
+	static byte stop();
 };
 #endif
 
@@ -207,41 +207,41 @@ public:
 
 class TwoWire {
 private:
-    static uint8_t rxBuffer[];
-    static uint8_t rxBufferIndex;
-    static uint8_t rxBufferLength;
+	static uint8_t rxBuffer[];
+	static uint8_t rxBufferIndex;
+	static uint8_t rxBufferLength;
 
-    static uint8_t txAddress;
-    static uint8_t txBuffer[];
-    static uint8_t txBufferIndex;
-    static uint8_t txBufferLength;
+	static uint8_t txAddress;
+	static uint8_t txBuffer[];
+	static uint8_t txBufferIndex;
+	static uint8_t txBufferLength;
 
-    // static uint8_t transmitting;
-    static void (*user_onRequest)(void);
-    static void (*user_onReceive)(int);
-    static void onRequestService(void);
-    static void onReceiveService(uint8_t*, int);
+	// static uint8_t transmitting;
+	static void (*user_onRequest)(void);
+	static void (*user_onReceive)(int);
+	static void onRequestService(void);
+	static void onReceiveService(uint8_t*, int);
 
 public:
-    TwoWire();
-    void begin();
-    void begin(uint8_t);
-    void begin(int);
-    void beginTransmission(uint8_t);
-    //void beginTransmission(int);
-    uint8_t endTransmission(uint16_t timeout = 0);
-    void nbendTransmission(void (*function)(int));
-    uint8_t requestFrom(uint8_t, int, uint16_t timeout = 0);
-    //uint8_t requestFrom(int, int);
-    void nbrequestFrom(uint8_t, int, void (*function)(int));
-    void send(uint8_t);
-    void send(uint8_t*, uint8_t);
-    //void send(int);
-    void send(char*);
-    uint8_t available(void);
-    uint8_t receive(void);
-    void onReceive(void (*)(int));
-    void onRequest(void (*)(void));
+	TwoWire();
+	void begin();
+	void begin(uint8_t);
+	void begin(int);
+	void beginTransmission(uint8_t);
+	//void beginTransmission(int);
+	uint8_t endTransmission(uint16_t timeout = 0);
+	void nbendTransmission(void (*function)(int));
+	uint8_t requestFrom(uint8_t, int, uint16_t timeout = 0);
+	//uint8_t requestFrom(int, int);
+	void nbrequestFrom(uint8_t, int, void (*function)(int));
+	void send(uint8_t);
+	void send(uint8_t*, uint8_t);
+	//void send(int);
+	void send(char*);
+	uint8_t available(void);
+	uint8_t receive(void);
+	void onReceive(void (*)(int));
+	void onRequest(void (*)(void));
 };
 
 #define TWI_READY   0

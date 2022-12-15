@@ -7,7 +7,7 @@
 
   Tested and works great with the Adafruit Ultimate GPS module
   using MTK33x9 chipset
-      ------> http://www.adafruit.com/products/746
+	  ------> http://www.adafruit.com/products/746
   Pick one up today at the Adafruit electronics shop
   and help support open source hardware & software! -ada
 
@@ -38,7 +38,7 @@
 #define PMTK_SET_NMEA_UPDATE_2HZ "$PMTK220,500*2B"  ///<  2 Hz
 #define PMTK_SET_NMEA_UPDATE_5HZ "$PMTK220,200*2C"  ///<  5 Hz
 #define PMTK_SET_NMEA_UPDATE_10HZ "$PMTK220,100*2F" ///< 10 Hz
-// Position fix update rate commands.
+ // Position fix update rate commands.
 #define PMTK_API_SET_FIX_CTL_100_MILLIHERTZ                                    \
   "$PMTK300,10000,0,0,0,0*2C" ///< Once every 10 seconds, 100 millihertz.
 #define PMTK_API_SET_FIX_CTL_200_MILLIHERTZ                                    \
@@ -53,28 +53,28 @@
 
 #define PMTK_SET_NMEA_OUTPUT_GLLONLY                                           \
   "$PMTK314,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on only the
-                                                      ///< GPGLL sentence
+													  ///< GPGLL sentence
 #define PMTK_SET_NMEA_OUTPUT_RMCONLY                                           \
   "$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on only the
-                                                      ///< GPRMC sentence
+													  ///< GPRMC sentence
 #define PMTK_SET_NMEA_OUTPUT_VTGONLY                                           \
   "$PMTK314,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on only the
-                                                      ///< GPVTG
+													  ///< GPVTG
 #define PMTK_SET_NMEA_OUTPUT_GGAONLY                                           \
   "$PMTK314,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on just the
-                                                      ///< GPGGA
+													  ///< GPGGA
 #define PMTK_SET_NMEA_OUTPUT_GSAONLY                                           \
   "$PMTK314,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on just the
-                                                      ///< GPGSA
+													  ///< GPGSA
 #define PMTK_SET_NMEA_OUTPUT_GSVONLY                                           \
   "$PMTK314,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on just the
-                                                      ///< GPGSV
+													  ///< GPGSV
 #define PMTK_SET_NMEA_OUTPUT_RMCGGA                                            \
   "$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28" ///< turn on GPRMC and
-                                                      ///< GPGGA
+													  ///< GPGGA
 #define PMTK_SET_NMEA_OUTPUT_RMCGGAGSA                                         \
   "$PMTK314,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29" ///< turn on GPRMC, GPGGA
-                                                      ///< and GPGSA
+													  ///< and GPGSA
 #define PMTK_SET_NMEA_OUTPUT_ALLDATA                                           \
   "$PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0*28" ///< turn on ALL THE DATA
 #define PMTK_SET_NMEA_OUTPUT_OFF                                               \
@@ -96,7 +96,7 @@
 
 #define PMTK_ENABLE_SBAS                                                       \
   "$PMTK313,1*2E" ///< Enable search for SBAS satellite (only works with 1Hz
-                  ///< output rate)
+				  ///< output rate)
 #define PMTK_ENABLE_WAAS "$PMTK301,2*2E" ///< Use WAAS for DGPS correction data
 
 #define PMTK_STANDBY                                                           \

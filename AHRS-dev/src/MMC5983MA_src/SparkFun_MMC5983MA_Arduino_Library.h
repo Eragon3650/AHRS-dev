@@ -24,186 +24,186 @@
 class SFE_MMC5983MA
 {
 private:
-  // I2C communication object instance.
-  SFE_MMC5983MA_IO mmc_io;
-  // Error callback function pointer.
-  // Function must accept a SF_MMC5983MA_ERROR as errorCode.
-  void (*errorCallback)(SF_MMC5983MA_ERROR errorCode) = nullptr;
+	// I2C communication object instance.
+	SFE_MMC5983MA_IO mmc_io;
+	// Error callback function pointer.
+	// Function must accept a SF_MMC5983MA_ERROR as errorCode.
+	void (*errorCallback)(SF_MMC5983MA_ERROR errorCode) = nullptr;
 
-  // Since some registers are write-only in MMC5983MA all operations
-  // are done in shadow memory locations. Default reset values are
-  // set to the shadow memory locations upon initialization and after
-  // any bit set in the shadow location the register is atomically written.
-  struct MemoryShadow
-  {
-    uint8_t internalControl0 = 0x0;
-    uint8_t internalControl1 = 0x0;
-    uint8_t internalControl2 = 0x0;
-    uint8_t internalControl3 = 0x0;
-  } memoryShadow;
+	// Since some registers are write-only in MMC5983MA all operations
+	// are done in shadow memory locations. Default reset values are
+	// set to the shadow memory locations upon initialization and after
+	// any bit set in the shadow location the register is atomically written.
+	struct MemoryShadow
+	{
+		uint8_t internalControl0 = 0x0;
+		uint8_t internalControl1 = 0x0;
+		uint8_t internalControl2 = 0x0;
+		uint8_t internalControl3 = 0x0;
+	} memoryShadow;
 
-  // Sets register bit(s) on memory shadows and then registers
-  bool setShadowBit(uint8_t registerAddress, const uint8_t bitMask);
+	// Sets register bit(s) on memory shadows and then registers
+	bool setShadowBit(uint8_t registerAddress, const uint8_t bitMask);
 
-  // Clears register bit(s) on memory shadows and then registers
-  bool clearShadowBit(uint8_t registerAddress, const uint8_t bitMask);
+	// Clears register bit(s) on memory shadows and then registers
+	bool clearShadowBit(uint8_t registerAddress, const uint8_t bitMask);
 
-  // Checks if a specific bit is set on a register memory shadow
-  bool isShadowBitSet(uint8_t registerAddress, const uint8_t bitMask);
+	// Checks if a specific bit is set on a register memory shadow
+	bool isShadowBitSet(uint8_t registerAddress, const uint8_t bitMask);
 
 public:
-  // Default constructor.
-  SFE_MMC5983MA() = default;
+	// Default constructor.
+	SFE_MMC5983MA() = default;
 
-  // Default destructor.
-  ~SFE_MMC5983MA() = default;
+	// Default destructor.
+	~SFE_MMC5983MA() = default;
 
-  // Sets the error callback function.
-  void setErrorCallback(void (*errorCallback)(SF_MMC5983MA_ERROR errorCode));
+	// Sets the error callback function.
+	void setErrorCallback(void (*errorCallback)(SF_MMC5983MA_ERROR errorCode));
 
-  // Convert errorCode to text
-  const char *errorCodeString(SF_MMC5983MA_ERROR errorCode);
-  
-  // Initializes MMC5983MA using I2C
-  bool begin(TwoWire &wirePort = Wire);
+	// Convert errorCode to text
+	const char* errorCodeString(SF_MMC5983MA_ERROR errorCode);
 
-  // Initializes MMC5983MA using SPI
-  bool begin(uint8_t csPin, SPIClass& spiPort = SPI);
-  bool begin(uint8_t csPin, SPISettings userSettings, SPIClass& spiPort = SPI);
+	// Initializes MMC5983MA using I2C
+	bool begin(TwoWire& wirePort = Wire);
 
-  // Polls if MMC5983MA is connected and if chip ID matches MMC5983MA chip id.
-  bool isConnected();
+	// Initializes MMC5983MA using SPI
+	bool begin(uint8_t csPin, SPIClass& spiPort = SPI);
+	bool begin(uint8_t csPin, SPISettings userSettings, SPIClass& spiPort = SPI);
 
-  // Returns die temperature. Range is -75C to 125C.
-  int getTemperature();
+	// Polls if MMC5983MA is connected and if chip ID matches MMC5983MA chip id.
+	bool isConnected();
 
-  // Soft resets the device.
-  bool softReset();
+	// Returns die temperature. Range is -75C to 125C.
+	int getTemperature();
 
-  // Enables interrupt generation after measurement is completed.
-  // Must be re-enabled after each measurement.
-  bool enableInterrupt();
+	// Soft resets the device.
+	bool softReset();
 
-  // Disables interrupt generation.
-  bool disableInterrupt();
+	// Enables interrupt generation after measurement is completed.
+	// Must be re-enabled after each measurement.
+	bool enableInterrupt();
 
-  // Checks if interrupt generation is enabled.
-  bool isInterruptEnabled();
+	// Disables interrupt generation.
+	bool disableInterrupt();
 
-  // Enables 3 wire SPI interface
-  bool enable3WireSPI();
+	// Checks if interrupt generation is enabled.
+	bool isInterruptEnabled();
 
-  // Disables SPI interface
-  bool disable3WireSPI();
+	// Enables 3 wire SPI interface
+	bool enable3WireSPI();
 
-  // Checks if SPI is enabled
-  bool is3WireSPIEnabled();
+	// Disables SPI interface
+	bool disable3WireSPI();
 
-  // Performs SET operation
-  bool performSetOperation();
+	// Checks if SPI is enabled
+	bool is3WireSPIEnabled();
 
-  // Performs RESET operation
-  bool performResetOperation();
+	// Performs SET operation
+	bool performSetOperation();
 
-  // Enables automatic SET/RESET
-  bool enableAutomaticSetReset();
+	// Performs RESET operation
+	bool performResetOperation();
 
-  // Disables automatic SET/RESET
-  bool disableAutomaticSetReset();
+	// Enables automatic SET/RESET
+	bool enableAutomaticSetReset();
 
-  // Checks if automatic SET/RESET is enabled
-  bool isAutomaticSetResetEnabled();
+	// Disables automatic SET/RESET
+	bool disableAutomaticSetReset();
 
-  // Enables X channel output
-  bool enableXChannel();
+	// Checks if automatic SET/RESET is enabled
+	bool isAutomaticSetResetEnabled();
 
-  // Disables X channel output
-  bool disableXChannel();
+	// Enables X channel output
+	bool enableXChannel();
 
-  // Checks if X channel output is enabled
-  bool isXChannelEnabled();
+	// Disables X channel output
+	bool disableXChannel();
 
-  // Enables Y and Z channels outputs
-  bool enableYZChannels();
+	// Checks if X channel output is enabled
+	bool isXChannelEnabled();
 
-  // Disables Y and Z channels outputs
-  bool disableYZChannels();
+	// Enables Y and Z channels outputs
+	bool enableYZChannels();
 
-  // Checks if YZ channels outputs are enabled
-  bool areYZChannelsEnabled();
+	// Disables Y and Z channels outputs
+	bool disableYZChannels();
 
-  // Sets decimation filter bandwidth. Allowed values are 800, 400, 200 or 100. Defaults to 100 on invalid values.
-  bool setFilterBandwidth(uint16_t bandwidth);
+	// Checks if YZ channels outputs are enabled
+	bool areYZChannelsEnabled();
 
-  // Gets current decimation filter bandwith. Values are in Hz.
-  uint16_t getFilterBandwith();
+	// Sets decimation filter bandwidth. Allowed values are 800, 400, 200 or 100. Defaults to 100 on invalid values.
+	bool setFilterBandwidth(uint16_t bandwidth);
 
-  // Enables continuous mode. Continuous mode frequency must be greater than 0.
-  bool enableContinuousMode();
+	// Gets current decimation filter bandwith. Values are in Hz.
+	uint16_t getFilterBandwith();
 
-  // Disables continuous mode.
-  bool disableContinuousMode();
+	// Enables continuous mode. Continuous mode frequency must be greater than 0.
+	bool enableContinuousMode();
 
-  // Checks if continuous mode is enabled.
-  bool isContinuousModeEnabled();
+	// Disables continuous mode.
+	bool disableContinuousMode();
 
-  // Sets continuous mode frequency. Allowed values are 1000, 200, 100, 50, 20, 10, 1 and 0 (off). Defaults to 0 (off).
-  bool setContinuousModeFrequency(uint16_t frequency);
+	// Checks if continuous mode is enabled.
+	bool isContinuousModeEnabled();
 
-  // Gets continuous mode frequency.
-  uint16_t getContinuousModeFrequency();
+	// Sets continuous mode frequency. Allowed values are 1000, 200, 100, 50, 20, 10, 1 and 0 (off). Defaults to 0 (off).
+	bool setContinuousModeFrequency(uint16_t frequency);
 
-  // Enables periodic set
-  bool enablePeriodicSet();
+	// Gets continuous mode frequency.
+	uint16_t getContinuousModeFrequency();
 
-  // Disables periodic set
-  bool disablePeriodicSet();
+	// Enables periodic set
+	bool enablePeriodicSet();
 
-  // Checks if periodic set is enabled
-  bool isPeriodicSetEnabled();  
+	// Disables periodic set
+	bool disablePeriodicSet();
 
-  // Sets how often the chip will perform an automatic set operation. Allowed values are 1, 25, 75, 100, 250, 500, 1000, 2000. Defaults to 1.
-  bool setPeriodicSetSamples(uint16_t numberOfSamples);
+	// Checks if periodic set is enabled
+	bool isPeriodicSetEnabled();
 
-  // Gets how many times the chip is performing an automatic set operation.
-  uint16_t getPeriodicSetSamples();
+	// Sets how often the chip will perform an automatic set operation. Allowed values are 1, 25, 75, 100, 250, 500, 1000, 2000. Defaults to 1.
+	bool setPeriodicSetSamples(uint16_t numberOfSamples);
 
-  // Apply extra current from positive side to negative side of the coil. This feature can be used to check whether the sensor has been saturated.
-  bool applyExtraCurrentPosToNeg();
+	// Gets how many times the chip is performing an automatic set operation.
+	uint16_t getPeriodicSetSamples();
 
-  // Remove extra current from positive side to negative side of the coil.
-  bool removeExtraCurrentPosToNeg();
+	// Apply extra current from positive side to negative side of the coil. This feature can be used to check whether the sensor has been saturated.
+	bool applyExtraCurrentPosToNeg();
 
-  // Checks if extra current is applied from positive to negative side of coil.
-  bool isExtraCurrentAppliedPosToNeg();
+	// Remove extra current from positive side to negative side of the coil.
+	bool removeExtraCurrentPosToNeg();
 
-  // Apply extra current from negative side to positive side of the coil. This feature can be used to check whether the sensor has been saturated.
-  bool applyExtracurrentNegToPos();
+	// Checks if extra current is applied from positive to negative side of coil.
+	bool isExtraCurrentAppliedPosToNeg();
 
-  // Remove extra current from negative side to positive side of the coil.
-  bool removeExtracurrentNegToPos();
+	// Apply extra current from negative side to positive side of the coil. This feature can be used to check whether the sensor has been saturated.
+	bool applyExtracurrentNegToPos();
 
-  // Checks if extra current is applied from negative to positive side of coil.
-  bool isExtraCurrentAppliedNegToPos();
+	// Remove extra current from negative side to positive side of the coil.
+	bool removeExtracurrentNegToPos();
 
-  // Get X axis measurement
-  uint32_t getMeasurementX();
+	// Checks if extra current is applied from negative to positive side of coil.
+	bool isExtraCurrentAppliedNegToPos();
 
-  // Get Y axis measurement
-  uint32_t getMeasurementY();
+	// Get X axis measurement
+	uint32_t getMeasurementX();
 
-  // Get Z axis measurement
-  uint32_t getMeasurementZ();
+	// Get Y axis measurement
+	uint32_t getMeasurementY();
 
-  // Get X, Y and Z field strengths in a single measurement
-  bool getMeasurementXYZ(uint32_t *x, uint32_t *y, uint32_t *z);
+	// Get Z axis measurement
+	uint32_t getMeasurementZ();
 
-  // Read and return the X, Y and Z field strengths
-  bool readFieldsXYZ(uint32_t *x, uint32_t *y, uint32_t *z);
+	// Get X, Y and Z field strengths in a single measurement
+	bool getMeasurementXYZ(uint32_t* x, uint32_t* y, uint32_t* z);
 
-  // Clear the Meas_T_Done and/or Meas_M_Done interrupts
-  // By default, clear both
-  bool clearMeasDoneInterrupt(uint8_t measMask = MEAS_T_DONE | MEAS_M_DONE);
+	// Read and return the X, Y and Z field strengths
+	bool readFieldsXYZ(uint32_t* x, uint32_t* y, uint32_t* z);
+
+	// Clear the Meas_T_Done and/or Meas_M_Done interrupts
+	// By default, clear both
+	bool clearMeasDoneInterrupt(uint8_t measMask = MEAS_T_DONE | MEAS_M_DONE);
 };
 
 #endif
