@@ -81,6 +81,18 @@
     <ClInclude Include="src\GPS_src\NMEA_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\BMP_src\bmp3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BMP_src\bmp3_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BMP_src\BMP3XX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BMP_src\I2CDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FusionAhrs.c">
@@ -126,5 +138,14 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\AHRS-dev.ino" />
+    <ClCompile Include="src\BMP_src\bmp3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BMP_src\BMP3XX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BMP_src\I2CDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

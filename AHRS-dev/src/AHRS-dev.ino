@@ -7,29 +7,26 @@
 // the setup function runs once when you press reset or power the board
 #include <i2c_driver.h>
 #include <i2c_driver_wire.h>
-#include "imx_rt1060/imx_rt1060_i2c_driver.h"
 #include "Fusion.h"
 #include "MMC5983MA_src/SparkFun_MMC5983MA_Arduino_Library.h"
-#include <SPI.h>
 #include "ISM330DHCX_src/SparkFun_ISM330DHCX.h"
+#include <SPI.h>
+#include <RH_RF95.h>
 #include "GPS_src/Adafruit_GPS.h"
+#include "BMP_src/BMP3XX.h"
+
+RH_RF95 rf95(10, digitalPinToInterrupt(2));
 
 #define GPSSerial Serial4
 Adafruit_GPS GPS(&GPSSerial);
 
 bool gpsStatus = false;
 
-//Adafruit_BMP3XX bmp;
+BMP3XX bmp;
 
-#define SEALEVELPRESSURE_INHG (29.95)
-#define ALTIMETER_CALIBRATE_TIME (5000)
-#define CUSTOM_ALTITUDE_CALC (false)
+#define SEALEVELPRESSURE_INHG (30.40)
 
 const float SEALEVELPRESSURE_HPA = SEALEVELPRESSURE_INHG * 33.86389f;
-
-float initHeight = 0.0f;
-float altitudeAdjusted = 0.0f;
-float heightAdjusted = 0.0f;
 
 SparkFun_ISM330DHCX ism;
 
@@ -39,7 +36,7 @@ FusionVector accelerometer;
 const int gyroOffset[3] = { 92, -551, -249 };
 const int accelOffset[3] = { 4, -33, 9 };
 
-#define USE_MAG
+//#define USE_MAG
 
 #ifdef USE_MAG
 SFE_MMC5983MA mag;
@@ -58,38 +55,12 @@ FusionOffset offset;
 
 FusionEuler attitude;
 
-elapsedMillis altimeterTimer;
-elapsedMillis serialTimer;
+elapsedMicros serialTimer;
 elapsedMicros executeTime;
 
 double t_delta = 0;
 
-/*
-void altimeterCalibrate(int t) {
-	Serial.println(F("Calibrating Altimeter..."));
-	elapsedMillis timer1;
-	elapsedMillis timer2;
-	int numSamples = 0;
-	float tempHeight;
-	initHeight = 0;
-
-	while (timer1 < t) {
-		if (timer2 >= 10) {
-			timer2 = 0;
-			tempHeight = bmp.readAltitude(SEALEVELPRESSURE_HPA);
-			
-			if (tempHeight < 1600.0) {
-				initHeight += tempHeight;
-				numSamples++;
-			}
-		}
-	}
-	
-	initHeight /= (float)numSamples;
-	Serial.println(F("Calibration complete"));
-	Serial.print(F("Starting altitude: ")); Serial.println(initHeight);
-}
-//*/
+uint8_t radioData[sizeof(double)];
 
 #ifdef USE_MAG
 void getMag(FusionVector *magnetometer) {
@@ -138,6 +109,7 @@ void setup() {
 	GPS.sendCommand(PMTK_SET_BAUD_9600);
 	GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
 	GPS.sendCommand(PMTK_API_SET_FIX_CTL_1HZ);// 1 Hz update rate
+	GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
 	// For the parsing code to work nicely and have time to sort thru the data, and
 	// print it out we don't suggest using anything higher than 1 Hz
 
@@ -151,17 +123,9 @@ void setup() {
 	GPSSerial.println(PMTK_Q_RELEASE);
 	//*/
 
-	/*
 	if (!bmp.begin_I2C()) {
 		Serial.println(F("Could not find a valid BMP3 sensor, check wiring!"));
 	}
-	bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
-	bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
-	bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
-	bmp.setOutputDataRate(BMP3_ODR_50_HZ);
-
-	altimeterCalibrate(ALTIMETER_CALIBRATE_TIME);
-	*/
 
 #ifdef USE_MAG
 
@@ -216,7 +180,18 @@ void setup() {
 
 	// Turn on the gyroscope's filter and apply settings.
 	ism.setGyroFilterLP1();
-	ism.setGyroLP1Bandwidth(ISM_STRONG);
+	ism.setGyroLP1Bandwidth(ISM_MEDIUM);
+
+	if (!rf95.init()) Serial.println(F("RF95 init failed"));
+	if (!rf95.setFrequency(910.0)) Serial.println(F("Set frequency failed"));
+	rf95.setTxPower(20, false);
+	/*
+	rf95.setSpreadingFactor(6);
+	rf95.setSignalBandwidth(250001);
+	//*/
+
+	uint8_t testMsg[] = "Testing Connection $1#2^3";
+	rf95.send(testMsg, sizeof(testMsg));
 
 	Serial.println(F("Starting..."));
 
@@ -251,23 +226,16 @@ void loop() {
 		attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
 	}
 
-	if (serialTimer >= 40) {
+	if (serialTimer >= 1000000) {
 		serialTimer = 0;
 
-		Serial.print(1.0 / t_delta); Serial.print('\t');
-
+		/*
 		Serial.print(attitude.angle.pitch, 1); Serial.print('\t');
 		Serial.print(attitude.angle.yaw, 1); Serial.print('\t');
 		Serial.print(attitude.angle.roll, 1); Serial.print('\t');
 
-		/*
-		altitudeAdjusted = bmp.readAltitude(SEALEVELPRESSURE_HPA);
-		heightAdjusted = METER_TO_FEET * (altitudeAdjusted - initHeight);
-		Serial.print(altitudeAdjusted); Serial.print(F('\t'));
-		Serial.print(heightAdjusted, 1);
-		//*/
+		Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA)); Serial.print('\t');
 
-		//*
 		if (gpsStatus) {
 			Serial.print(GPS.latitudeDegrees, 6); Serial.print(F(", "));
 			Serial.print(GPS.longitudeDegrees, 6); Serial.print('\t');
@@ -275,6 +243,14 @@ void loop() {
 		}
 		//*/
 
-		Serial.println();
+		uint8_t* latChar = (uint8_t*)&GPS.latitudeDegrees;
+		uint8_t* lonChar = (uint8_t*)&GPS.longitudeDegrees;
+
+		for (int ii = 0; ii < sizeof(latChar); ii++) radioData[ii] = latChar[ii];
+		//for (int ii = sizeof(latChar); ii < (sizeof(latChar) + sizeof(lonChar)); ii++) radioData[ii] = lonChar[ii];
+
+		rf95.send(radioData, sizeof(radioData));
+
+		Serial.println(serialTimer);
 	}
 }
