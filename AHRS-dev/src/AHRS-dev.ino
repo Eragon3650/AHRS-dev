@@ -14,6 +14,9 @@
 #include <RH_RF95.h>
 #include "GPS_src/Adafruit_GPS.h"
 #include "BMP_src/BMP3XX.h"
+#include <PWMServo.h>
+
+PWMServo myservo;  // create servo object to control a servo
 
 RH_RF95 rf95(10, digitalPinToInterrupt(14));
 
@@ -24,7 +27,7 @@ bool gpsStatus = false;
 
 BMP3XX bmp;
 
-#define SEALEVELPRESSURE_INHG (30.40)
+#define SEALEVELPRESSURE_INHG (30.21)
 
 const float SEALEVELPRESSURE_HPA = SEALEVELPRESSURE_INHG * 33.86389f;
 
@@ -60,10 +63,10 @@ elapsedMicros executeTime;
 
 double t_delta = 0;
 
-uint8_t radioData[sizeof(double)];
+byte radioData[50];
 
 #ifdef USE_MAG
-void getMag(FusionVector *magnetometer) {
+void getMag(FusionVector* magnetometer) {
 #define M magnetometer -> axis
 	uint32_t magDataX = 0;
 	uint32_t magDataY = 0;
@@ -78,13 +81,13 @@ void getMag(FusionVector *magnetometer) {
 }
 #endif
 
-void getGyro(FusionVector *gyro) {
+void getGyro(FusionVector* gyro) {
 #define G gyro -> axis
 	sfe_ism_data_t gyroData;
 	ism.getGyro(&gyroData);
-	G.x = (gyroData.xData - gyroOffset[0] ) * 0.001;
-	G.y = (gyroData.yData - gyroOffset[1] ) * 0.001;
-	G.z = (gyroData.zData - gyroOffset[2] ) * 0.001;
+	G.x = (gyroData.xData - gyroOffset[0]) * 0.001;
+	G.y = (gyroData.yData - gyroOffset[1]) * 0.001;
+	G.z = (gyroData.zData - gyroOffset[2]) * 0.001;
 #undef G
 }
 
@@ -92,17 +95,19 @@ void getAccel(FusionVector* accel) {
 #define A accel -> axis
 	sfe_ism_data_t accelData;
 	ism.getAccel(&accelData);
-	A.x = (accelData.xData - accelOffset[0] ) * 0.001;
-	A.y = (accelData.yData - accelOffset[1] ) * 0.001;
-	A.z = (accelData.zData - accelOffset[2] ) * 0.001;
+	A.x = (accelData.xData - accelOffset[0]) * 0.001;
+	A.y = (accelData.yData - accelOffset[1]) * 0.001;
+	A.z = (accelData.zData - accelOffset[2]) * 0.001;
 #undef A
 }
 
 void setup() {
+	myservo.attach(2);
+	myservo.write(85); //105
 	Serial.begin(115200);
 
-	Wire.setClock(400000);
 	Wire.begin();
+	Wire.setClock(400000);
 
 	Wire1.setClock(1000000);
 	Wire1.begin();
@@ -123,137 +128,151 @@ void setup() {
 	delay(1000);
 
 	// Ask for firmware version
-	GPSSerial.println(PMTK_Q_RELEASE);
+	//GPSSerial.println(PMTK_Q_RELEASE);
 	//*/
-
-	if (!bmp.begin_I2C(119, &Wire1)) {
-		Serial.println(F("Could not find a valid BMP3 sensor, check wiring!"));
+	if (!bmp.begin_I2C((uint8_t)119, &Wire1)) {
+			Serial.println(F("Could not find a valid BMP3 sensor, check wiring!"));
 	}
 
 #ifdef USE_MAG
 
-	if (!mag.begin())//check if ism begins
-	{
-		Serial.println(F("mag did not begin"));
-		while (1);
-	}
+			if (!mag.begin())//check if ism begins
+			{
+				Serial.println(F("mag did not begin"));
+				while (1);
+			}
 
-	mag.softReset();
+			mag.softReset();
 
-	Serial.println(F("MMC5983MA connected"));
+			Serial.println(F("MMC5983MA connected"));
 
-	mag.setFilterBandwidth(800);
+			mag.setFilterBandwidth(800);
 
-	mag.setContinuousModeFrequency(100);
+			mag.setContinuousModeFrequency(100);
 
-	mag.enableAutomaticSetReset();
+			mag.enableAutomaticSetReset();
 
-	mag.enableContinuousMode();
+			mag.enableContinuousMode();
 
 #endif
 
-	if (!ism.begin())//check if ism begins
-	{
-		Serial.println(F("ism did not begin"));
-		while (1);
-	}
+			//*/
 
-	//reset ism
-	ism.deviceReset();
-	while (!ism.getDeviceReset())
-	{
-		delay(1);
-	}
-	Serial.println(F("ism reset"));
+			if (!ism.begin(Wire))//check if ism begins
+			{
+				Serial.println(F("ism did not begin"));
+				while (1);
+			}
 
-	ism.setDeviceConfig();
-	ism.setBlockDataUpdate();
+			//reset ism
+			ism.deviceReset();
+			while (!ism.getDeviceReset())
+			{
+				delay(1);
+			}
+			Serial.println(F("ism reset"));
 
-	// Set the output data rate and precision of the accelerometer
-	ism.setAccelDataRate(ISM_XL_ODR_416Hz);
-	ism.setAccelFullScale(ISM_16g);
+			ism.setDeviceConfig();
+			ism.setBlockDataUpdate();
 
-	// Set the output data rate and precision of the gyroscope
-	ism.setGyroDataRate(ISM_GY_ODR_416Hz);
-	ism.setGyroFullScale(ISM_2000dps);
+			// Set the output data rate and precision of the accelerometer
+			ism.setAccelDataRate(ISM_XL_ODR_416Hz);
+			ism.setAccelFullScale(ISM_16g);
 
-	// Turn on the accelerometer's filter and apply settings.
-	ism.setAccelFilterLP2();
-	ism.setAccelSlopeFilter(ISM_HP_ODR_DIV_100);
+			// Set the output data rate and precision of the gyroscope
+			ism.setGyroDataRate(ISM_GY_ODR_416Hz);
+			ism.setGyroFullScale(ISM_2000dps);
 
-	// Turn on the gyroscope's filter and apply settings.
-	ism.setGyroFilterLP1();
-	ism.setGyroLP1Bandwidth(ISM_MEDIUM);
+			// Turn on the accelerometer's filter and apply settings.
+			ism.setAccelFilterLP2();
+			ism.setAccelSlopeFilter(ISM_HP_ODR_DIV_100);
 
-	if (!rf95.init()) Serial.println(F("RF95 init failed"));
-	if (!rf95.setFrequency(910.0)) Serial.println(F("Set frequency failed"));
-	rf95.setTxPower(20, false);
-	/*
-	rf95.setSpreadingFactor(6);
-	rf95.setSignalBandwidth(250001);
-	//*/
+			// Turn on the gyroscope's filter and apply settings.
+			ism.setGyroFilterLP1();
+			ism.setGyroLP1Bandwidth(ISM_MEDIUM);
+			//*/
 
-	uint8_t testMsg[] = "Testing Connection $1#2^3";
-	rf95.send(testMsg, sizeof(testMsg));
+			if (!rf95.init()) Serial.println(F("RF95 init failed"));
+			if (!rf95.setFrequency(915.0)) Serial.println(F("Set frequency failed"));
+			rf95.setTxPower(20, false);
+			/*
+			rf95.setSpreadingFactor(6);
+			rf95.setSignalBandwidth(250001);
+			//*/
 
-	Serial.println(F("Starting..."));
+			Serial.println(F("Starting..."));
 
-	FusionOffsetInitialise(&offset, FREQUENCY);
-	FusionAhrsInitialise(&ahrs);
-}
+			FusionOffsetInitialise(&offset, FREQUENCY);
+			FusionAhrsInitialise(&ahrs);
+		}
 
-// the loop function runs over and over again until power down or reset
-void loop() {
-	//*
-	char c = GPS.read();
-	if (GPS.newNMEAreceived()) {
-		if (!GPS.parse(GPS.lastNMEA())) return;
-		gpsStatus = GPS.fix;
-	}
-	//*/
-
-	if (executeTime >= 300) {
-		t_delta = executeTime * 0.000001;
-		executeTime = 0;
-		getGyro(&gyroscope);
-		getAccel(&accelerometer);
-		gyroscope = FusionOffsetUpdate(&offset, gyroscope);
-
-#ifdef USE_MAG
-		getMag(&magnetometer);
-
-		FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, t_delta);
-#else
-		FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, t_delta);
-#endif
-		attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
-	}
-
-	if (serialTimer >= 1000000) {
-		serialTimer = 0;
-
-		/*
-		Serial.print(attitude.angle.pitch, 1); Serial.print('\t');
-		Serial.print(attitude.angle.yaw, 1); Serial.print('\t');
-		Serial.print(attitude.angle.roll, 1); Serial.print('\t');
-
-		Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA)); Serial.print('\t');
-
-		if (gpsStatus) {
-			Serial.print(GPS.latitudeDegrees, 6); Serial.print(F(", "));
-			Serial.print(GPS.longitudeDegrees, 6); Serial.print('\t');
-			Serial.print(GPS.satellites); Serial.print('\t');
+	// the loop function runs over and over again until power down or reset
+	void loop() {
+		//*
+		char c = GPS.read();
+		if (GPS.newNMEAreceived()) {
+			gpsStatus = GPS.fix;
+			if (!GPS.parse(GPS.lastNMEA())) return;
 		}
 		//*/
 
-		uint8_t* latChar = (uint8_t*)&GPS.latitudeDegrees;
-		uint8_t* lonChar = (uint8_t*)&GPS.longitudeDegrees;
+		if (executeTime >= 300) {
+			t_delta = executeTime * 0.000001;
+			executeTime = 0;
+			getGyro(&gyroscope);
+			getAccel(&accelerometer);
+			gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
-		for (int ii = 0; ii < sizeof(latChar); ii++) radioData[ii] = latChar[ii];
-		//for (int ii = sizeof(latChar); ii < (sizeof(latChar) + sizeof(lonChar)); ii++) radioData[ii] = lonChar[ii];
+#ifdef USE_MAG
+			getMag(&magnetometer);
 
-		rf95.send(radioData, sizeof(radioData));
+			FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, t_delta);
+#else
+			FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, t_delta);
+#endif
+			attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+		}
 
-		Serial.println(serialTimer);
+		myservo.write(85 - (abs(attitude.angle.pitch) * 6.5 / 9.0));
+
+		if (serialTimer >= 1000000) {
+			serialTimer = 0;
+
+			//*
+			Serial.print(attitude.angle.pitch, 1); Serial.print('\t');
+			Serial.print(attitude.angle.yaw, 1); Serial.print('\t');
+			Serial.print(attitude.angle.roll, 1); Serial.print('\t');
+
+			Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA)); Serial.print('\t');
+
+			if (gpsStatus) {
+				Serial.print(GPS.latitudeDegrees, 6); Serial.print(F(", "));
+				Serial.print(GPS.longitudeDegrees, 6); Serial.print('\t');
+				Serial.print(GPS.satellites); Serial.print('\t');
+			}
+			//*/
+			double lat = 0.0;
+			double lon = 0.0;
+			if (gpsStatus) {
+				lat = GPS.latitudeDegrees;
+				lon = GPS.longitudeDegrees;
+			}
+
+			//*
+
+			String temp_radioData = String(attitude.angle.pitch, 1) + "," +
+				String(attitude.angle.roll, 1) + "," +
+					String(attitude.angle.yaw, 1) + "," +
+						String(bmp.readAltitude(SEALEVELPRESSURE_HPA), 2) + "," +
+							String(lat, 6) + "," +
+								String(lon, 6) + "," +
+									"\n";
+
+			temp_radioData.getBytes(radioData, sizeof(radioData));
+
+			rf95.send(radioData, sizeof(radioData));
+			//*/
+
+			Serial.println(serialTimer);
+		}
 	}
-}
