@@ -15,9 +15,9 @@
 #include "GPS_src/Adafruit_GPS.h"
 #include "BMP_src/BMP3XX.h"
 
-RH_RF95 rf95(10, digitalPinToInterrupt(2));
+RH_RF95 rf95(10, digitalPinToInterrupt(14));
 
-#define GPSSerial Serial4
+#define GPSSerial Serial2
 Adafruit_GPS GPS(&GPSSerial);
 
 bool gpsStatus = false;
@@ -104,6 +104,9 @@ void setup() {
 	Wire.setClock(400000);
 	Wire.begin();
 
+	Wire1.setClock(1000000);
+	Wire1.begin();
+
 	//*
 	GPS.begin(9600);
 	GPS.sendCommand(PMTK_SET_BAUD_9600);
@@ -123,7 +126,7 @@ void setup() {
 	GPSSerial.println(PMTK_Q_RELEASE);
 	//*/
 
-	if (!bmp.begin_I2C()) {
+	if (!bmp.begin_I2C(119, &Wire1)) {
 		Serial.println(F("Could not find a valid BMP3 sensor, check wiring!"));
 	}
 

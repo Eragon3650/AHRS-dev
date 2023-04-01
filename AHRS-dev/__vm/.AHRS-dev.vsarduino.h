@@ -17,7 +17,7 @@
 #define __TEENSY4_IMXRT1062__ 1
 #define _VMDEBUG 1
 #define __IMXRT1062__ 1
-#define TEENSYDUINO 157
+#define TEENSYDUINO 158
 #define ARDUINO 108010
 #define ARDUINO_TEENSY40 1
 #define F_CPU 600000000
