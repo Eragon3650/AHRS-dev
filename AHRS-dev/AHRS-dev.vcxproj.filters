@@ -93,6 +93,12 @@
     <ClInclude Include="src\BMP_src\I2CDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\altitude_kf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RCRPID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FusionAhrs.c">
@@ -147,5 +153,16 @@
     <ClCompile Include="src\BMP_src\I2CDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\altitude_kf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RCRPID.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\board.txt">
+      <Filter>Misc Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

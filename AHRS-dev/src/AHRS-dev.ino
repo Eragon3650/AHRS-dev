@@ -2,9 +2,11 @@
  Name:		AHRS_dev.ino
  Created:	9/17/22 23:05:32
  Author:	alexh
+
 */
 
 // the setup function runs once when you press reset or power the board
+#include "RCRPID.h"
 #include <i2c_driver.h>
 #include <i2c_driver_wire.h>
 #include "Fusion.h"
@@ -15,6 +17,8 @@
 #include "GPS_src/Adafruit_GPS.h"
 #include "BMP_src/BMP3XX.h"
 #include <PWMServo.h>
+#include "altitude_kf.h"
+#include "RCRPID.h"
 
 PWMServo myservo;  // create servo object to control a servo
 
@@ -27,7 +31,7 @@ bool gpsStatus = false;
 
 BMP3XX bmp;
 
-#define SEALEVELPRESSURE_INHG (30.21)
+#define SEALEVELPRESSURE_INHG (30.18)
 
 const float SEALEVELPRESSURE_HPA = SEALEVELPRESSURE_INHG * 33.86389f;
 
@@ -53,6 +57,8 @@ FusionVector magnetometer;
 FusionAhrs ahrs;
 FusionOffset offset;
 
+Altitude_KF altitudeEstimator(2.0, 1.0);
+
 #define METER_TO_FEET (3.2808395)
 #define FREQUENCY (416)
 
@@ -62,8 +68,28 @@ elapsedMicros serialTimer;
 elapsedMicros executeTime;
 
 double t_delta = 0;
+int servoPos = 0;
 
 byte radioData[50];
+
+boolean start = false;
+boolean burnout = false;
+boolean apogee = false;
+
+static double G = 9.80665;
+static double massCoast = 0.6039;
+static double area = pow((0.0563 / 2), 2) * M_PI;
+static double R = 287.0;
+static double targetHeight = 850.0 * 0.3048;
+static double twoG = G * 2.0;
+double startingAltitude;
+
+double temperature, kVe, burnAltitude, burnVelocity;
+
+float currentVelocity = 0.0;
+float setVelocity = 0.0;
+float servoOutput = 0;
+RCRPID velocityPID(&currentVelocity, &servoOutput, &setVelocity, KP, KI, KD, 0.0f, 0, 1);
 
 #ifdef USE_MAG
 void getMag(FusionVector* magnetometer) {
@@ -101,9 +127,58 @@ void getAccel(FusionVector* accel) {
 #undef A
 }
 
+void updateSetpointParams(double altitude, double velocity, double pres, double temp) {
+	double rho = pres / (R * (temp + 273.15));
+	double kV = (massCoast * twoG) / (rho * area);
+	double squareVelocity = pow(velocity, 2.0);
+	double tempH = (kV / (twoG * 0.9)) * log((squareVelocity * 0.9) / kV + 1.0);
+	double slope = (tempH - (kV / (twoG * 0.44)) * log((squareVelocity * 0.44) / kV + 1.0)) / 0.46;
+	
+	double Cde = (targetHeight - tempH) / slope + 0.9;
+
+	kVe = kV / Cde;
+	burnAltitude = altitude;
+	burnVelocity = velocity;
+}
+
+void updateSetpointVelocity(double altitude, double velocity) {
+	setVelocity = ( sqrt( ( pow( burnVelocity, 2.0 ) + kVe ) / exp( (altitude - burnAltitude) * twoG / kVe) ) - kVe );
+	currentVelocity = velocity;
+}
+
+void servoCorrection() {
+	velocityPID.Compute();
+	int servoAngle = 0.0 + (servoOutput * 180.0);
+	myservo.write(servoAngle);
+}
+
+int compare(const void* a, const void* b)
+{
+	return (*(int*)a - *(int*)b);
+}
+
+int median(int arr[], int size) {
+	qsort(arr, size, sizeof(arr[0]), compare);
+	if (size % 2 != 0)
+		return (int)arr[size / 2];
+	return (int)(arr[(size - 1) / 2] + arr[size / 2]) / 2.0;
+}
+
+void calibrateAGL() {
+	double calibration;
+	for (int i = 0; i < 20; i++) {
+		calibration += bmp.readAltitude(SEALEVELPRESSURE_HPA);
+	}
+	startingAltitude = calibration / 20;
+}
+
+double vectorMagnitude(FusionVector vector) {
+	return sqrt(pow(vector.axis.x, 2) + pow(vector.axis.y, 2) + pow(vector.axis.z, 2));
+}
+
 void setup() {
-	myservo.attach(2);
-	myservo.write(85); //105
+	myservo.attach(2, 850, 2500);
+	myservo.write(servoPos); //105
 	Serial.begin(115200);
 
 	Wire.begin();
@@ -133,6 +208,7 @@ void setup() {
 	if (!bmp.begin_I2C((uint8_t)119, &Wire1)) {
 			Serial.println(F("Could not find a valid BMP3 sensor, check wiring!"));
 	}
+	Serial.println(F("bmp start"));
 
 #ifdef USE_MAG
 
@@ -161,7 +237,6 @@ void setup() {
 			if (!ism.begin(Wire))//check if ism begins
 			{
 				Serial.println(F("ism did not begin"));
-				while (1);
 			}
 
 			//reset ism
@@ -200,6 +275,8 @@ void setup() {
 			rf95.setSignalBandwidth(250001);
 			//*/
 
+			calibrateAGL();
+
 			Serial.println(F("Starting..."));
 
 			FusionOffsetInitialise(&offset, FREQUENCY);
@@ -216,7 +293,7 @@ void setup() {
 		}
 		//*/
 
-		if (executeTime >= 300) {
+		if (executeTime >= 500) {
 			t_delta = executeTime * 0.000001;
 			executeTime = 0;
 			getGyro(&gyroscope);
@@ -231,11 +308,26 @@ void setup() {
 			FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, t_delta);
 #endif
 			attitude = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+
+			altitudeEstimator.propagate(vectorMagnitude(FusionAhrsGetLinearAcceleration(&ahrs)) * G, t_delta);
+			altitudeEstimator.update(bmp.readAltitude(SEALEVELPRESSURE_HPA) - startingAltitude);
+
+			if(start) updateSetpointParams(altitudeEstimator.h, altitudeEstimator.v, bmp.pressure, bmp.temperature);
 		}
 
-		myservo.write(85 - (abs(attitude.angle.pitch) * 6.5 / 9.0));
+		if (start && !apogee) {
 
-		if (serialTimer >= 1000000) {
+			altitudeEstimator.update(bmp.readAltitude(SEALEVELPRESSURE_HPA) - startingAltitude);
+
+			updateSetpointVelocity(altitudeEstimator.h, altitudeEstimator.v);
+			servoCorrection();
+		}
+
+		if (!start) {
+			start = 2 <= vectorMagnitude(FusionAhrsGetLinearAcceleration(&ahrs));
+		}
+
+		if (serialTimer >= 10000) {
 			serialTimer = 0;
 
 			//*
@@ -243,14 +335,15 @@ void setup() {
 			Serial.print(attitude.angle.yaw, 1); Serial.print('\t');
 			Serial.print(attitude.angle.roll, 1); Serial.print('\t');
 
-			Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA)); Serial.print('\t');
+			Serial.print(altitudeEstimator.h, 1); Serial.print('\t');
+			Serial.print(altitudeEstimator.v, 1); Serial.print('\t');
 
 			if (gpsStatus) {
 				Serial.print(GPS.latitudeDegrees, 6); Serial.print(F(", "));
 				Serial.print(GPS.longitudeDegrees, 6); Serial.print('\t');
 				Serial.print(GPS.satellites); Serial.print('\t');
 			}
-			//*/
+			//*
 			double lat = 0.0;
 			double lon = 0.0;
 			if (gpsStatus) {
@@ -259,7 +352,6 @@ void setup() {
 			}
 
 			//*
-
 			String temp_radioData = String(attitude.angle.pitch, 1) + "," +
 				String(attitude.angle.roll, 1) + "," +
 					String(attitude.angle.yaw, 1) + "," +
@@ -273,6 +365,17 @@ void setup() {
 			rf95.send(radioData, sizeof(radioData));
 			//*/
 
+			Serial.print(start); Serial.print('\t');
+
 			Serial.println(serialTimer);
+
+			if (start && (1.0 >= vectorMagnitude(FusionAhrsGetEarthAcceleration(&ahrs)))) {
+				burnout = true;
+			}
+
+			if (burnout && (0.1 >= vectorMagnitude(FusionAhrsGetEarthAcceleration(&ahrs)))) {
+				apogee = true;
+				myservo.write(0);
+			}
 		}
 	}
